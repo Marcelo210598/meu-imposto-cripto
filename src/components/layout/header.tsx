@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Bitcoin, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useState } from "react";
 
 export function Header() {
@@ -21,47 +22,47 @@ export function Header() {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-6">
           <Link
-            href="#features"
+            href="/exemplos"
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
-            Funcionalidades
+            Exemplos
           </Link>
           <Link
-            href="#how-it-works"
+            href="/faq"
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
-            Como Funciona
+            FAQ
           </Link>
           <Link
-            href="#pricing"
+            href="/precos"
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             Preços
           </Link>
         </nav>
 
-        <div className="hidden md:flex items-center gap-3">
-          <Button variant="ghost" asChild>
-            <Link href="/login">Entrar</Link>
-          </Button>
+        <div className="hidden md:flex items-center gap-2">
+          <ThemeToggle />
           <Button asChild>
             <Link href="/calculadora">Começar Grátis</Link>
           </Button>
         </div>
 
         {/* Mobile Menu Button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-        >
-          {isMenuOpen ? (
-            <X className="h-5 w-5" />
-          ) : (
-            <Menu className="h-5 w-5" />
-          )}
-        </Button>
+        <div className="flex md:hidden items-center gap-2">
+          <ThemeToggle />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            {isMenuOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
+          </Button>
+        </div>
       </div>
 
       {/* Mobile Navigation */}
@@ -69,31 +70,28 @@ export function Header() {
         <div className="md:hidden border-t bg-background">
           <nav className="container mx-auto flex flex-col gap-4 p-4">
             <Link
-              href="#features"
+              href="/exemplos"
               className="text-sm font-medium text-muted-foreground hover:text-foreground"
               onClick={() => setIsMenuOpen(false)}
             >
-              Funcionalidades
+              Exemplos
             </Link>
             <Link
-              href="#how-it-works"
+              href="/faq"
               className="text-sm font-medium text-muted-foreground hover:text-foreground"
               onClick={() => setIsMenuOpen(false)}
             >
-              Como Funciona
+              FAQ
             </Link>
             <Link
-              href="#pricing"
+              href="/precos"
               className="text-sm font-medium text-muted-foreground hover:text-foreground"
               onClick={() => setIsMenuOpen(false)}
             >
               Preços
             </Link>
-            <div className="flex flex-col gap-2 pt-4 border-t">
-              <Button variant="outline" asChild>
-                <Link href="/login">Entrar</Link>
-              </Button>
-              <Button asChild>
+            <div className="pt-4 border-t">
+              <Button asChild className="w-full">
                 <Link href="/calculadora">Começar Grátis</Link>
               </Button>
             </div>

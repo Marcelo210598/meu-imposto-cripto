@@ -1,37 +1,48 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
-  Upload,
   Plus,
   TrendingUp,
   TrendingDown,
   DollarSign,
   AlertCircle,
+  Trash2,
+  AlertTriangle,
+  CheckCircle,
+  FileDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatCrypto } from "@/lib/utils";
+import { Operacao, LIMITE_ISENCAO_MENSAL } from "@/lib/types";
+import { salvarOperacoes, carregarOperacoes, limparOperacoes } from "@/lib/storage";
+import {
+  calcularResumoGeral,
+  calcularResumosMensais,
+  gerarDadosGrafico,
+} from "@/lib/calculadora";
+import { UploadCSV } from "@/components/calculadora/upload-csv";
+import { GraficoResumo } from "@/components/calculadora/grafico-resumo";
+import { PortfolioCard } from "@/components/calculadora/portfolio-card";
+import { exportarPDF } from "@/lib/export-pdf";
 
-interface Operacao {
-  id: string;
-  tipo: "compra" | "venda";
-  cripto: string;
-  quantidade: number;
-  valorTotal: number;
-  data: string;
-}
-
-interface Resumo {
-  totalVendas: number;
-  lucroTotal: number;
-  impostoDevido: number;
-  isento: boolean;
-}
+const CRIPTOS_DISPONIVEIS = [
+  { value: "BTC", label: "Bitcoin (BTC)" },
+  { value: "ETH", label: "Ethereum (ETH)" },
+  { value: "USDT", label: "Tether (USDT)" },
+  { value: "USDC", label: "USD Coin (USDC)" },
+  { value: "SOL", label: "Solana (SOL)" },
+  { value: "BNB", label: "BNB" },
+  { value: "XRP", label: "Ripple (XRP)" },
+  { value: "ADA", label: "Cardano (ADA)" },
+  { value: "DOGE", label: "Dogecoin (DOGE)" },
+  { value: "DOT", label: "Polkadot (DOT)" },
+];
 
 export default function CalculadoraPage() {
   const [operacoes, setOperacoes] = useState<Operacao[]>([]);
@@ -42,41 +53,35 @@ export default function CalculadoraPage() {
     valorTotal: "",
     data: new Date().toISOString().split("T")[0],
   });
+  const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const [mesSelecionado, setMesSelecionado] = useState<string | null>(null);
 
-  const calcularResumo = (): Resumo => {
-    const vendas = operacoes.filter((op) => op.tipo === "venda");
-    const compras = operacoes.filter((op) => op.tipo === "compra");
+  // Carregar operações do localStorage
+  useEffect(() => {
+    const ops = carregarOperacoes();
+    setOperacoes(ops);
+  }, []);
 
-    const totalVendas = vendas.reduce((acc, op) => acc + op.valorTotal, 0);
-    const totalCompras = compras.reduce((acc, op) => acc + op.valorTotal, 0);
-
-    // Cálculo simplificado - na prática precisa do preço médio por cripto
-    const lucroTotal = totalVendas - totalCompras;
-    const isento = totalVendas <= 35000;
-
-    let impostoDevido = 0;
-    if (!isento && lucroTotal > 0) {
-      // Alíquota de 15% para ganhos até 5 milhões
-      impostoDevido = lucroTotal * 0.15;
+  // Salvar operações no localStorage sempre que mudar
+  useEffect(() => {
+    if (operacoes.length > 0) {
+      salvarOperacoes(operacoes);
     }
-
-    return {
-      totalVendas,
-      lucroTotal,
-      impostoDevido,
-      isento,
-    };
-  };
+  }, [operacoes]);
 
   const adicionarOperacao = () => {
     if (!novaOperacao.quantidade || !novaOperacao.valorTotal) return;
+
+    const quantidade = parseFloat(novaOperacao.quantidade);
+    const valorTotal = parseFloat(novaOperacao.valorTotal);
 
     const operacao: Operacao = {
       id: Date.now().toString(),
       tipo: novaOperacao.tipo,
       cripto: novaOperacao.cripto,
-      quantidade: parseFloat(novaOperacao.quantidade),
-      valorTotal: parseFloat(novaOperacao.valorTotal),
+      quantidade,
+      valorTotal,
+      precoUnitario: valorTotal / quantidade,
       data: novaOperacao.data,
     };
 
@@ -88,246 +93,431 @@ export default function CalculadoraPage() {
       valorTotal: "",
       data: new Date().toISOString().split("T")[0],
     });
+    setMostrarFormulario(false);
   };
 
   const removerOperacao = (id: string) => {
-    setOperacoes(operacoes.filter((op) => op.id !== id));
+    const novasOps = operacoes.filter((op) => op.id !== id);
+    setOperacoes(novasOps);
+    if (novasOps.length === 0) {
+      limparOperacoes();
+    }
   };
 
-  const resumo = calcularResumo();
+  const handleImportCSV = (novasOperacoes: Operacao[]) => {
+    setOperacoes([...operacoes, ...novasOperacoes]);
+  };
+
+  const handleLimparTudo = () => {
+    if (confirm("Tem certeza que deseja remover todas as operações?")) {
+      setOperacoes([]);
+      limparOperacoes();
+    }
+  };
+
+  const resumoGeral = calcularResumoGeral(operacoes);
+  const resumosMensais = calcularResumosMensais(operacoes);
+  const dadosGrafico = gerarDadosGrafico(operacoes);
+
+  // Mês atual para exibição
+  const mesAtual = new Date().toISOString().substring(0, 7);
+  const resumoMesAtual = resumosMensais.find((r) => r.mes === mesAtual) || {
+    totalVendas: 0,
+    lucroTotal: 0,
+    impostoDevido: 0,
+    isento: true,
+  };
 
   return (
     <div className="min-h-screen bg-muted/30">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
-        <div className="container mx-auto flex h-16 items-center px-4">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar
-            </Link>
-          </Button>
-          <h1 className="ml-4 text-lg font-semibold">Calculadora de IR</h1>
+        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+          <div className="flex items-center">
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Voltar
+              </Link>
+            </Button>
+            <h1 className="ml-4 text-lg font-semibold">Calculadora de IR</h1>
+          </div>
+          {operacoes.length > 0 && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  exportarPDF({
+                    operacoes,
+                    resumoGeral,
+                    resumosMensais,
+                  })
+                }
+              >
+                <FileDown className="h-4 w-4 mr-2" />
+                Exportar PDF
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleLimparTudo}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Limpar
+              </Button>
+            </div>
+          )}
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        {/* Cards de Resumo */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Operações</p>
+                  <p className="text-2xl font-bold">{resumoGeral.totalOperacoes}</p>
+                </div>
+                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <TrendingUp className="h-6 w-6 text-primary" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Vendas (Mês Atual)</p>
+                  <p className="text-2xl font-bold">
+                    {formatCurrency(resumoMesAtual.totalVendas)}
+                  </p>
+                </div>
+                <div
+                  className={`h-12 w-12 rounded-full flex items-center justify-center ${
+                    resumoMesAtual.totalVendas > LIMITE_ISENCAO_MENSAL
+                      ? "bg-destructive/10"
+                      : "bg-green-100"
+                  }`}
+                >
+                  {resumoMesAtual.totalVendas > LIMITE_ISENCAO_MENSAL ? (
+                    <AlertTriangle className="h-6 w-6 text-destructive" />
+                  ) : (
+                    <CheckCircle className="h-6 w-6 text-green-600" />
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Lucro Acumulado</p>
+                  <p
+                    className={`text-2xl font-bold ${
+                      resumoGeral.lucroAcumulado >= 0
+                        ? "text-green-600"
+                        : "text-destructive"
+                    }`}
+                  >
+                    {formatCurrency(resumoGeral.lucroAcumulado)}
+                  </p>
+                </div>
+                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  {resumoGeral.lucroAcumulado >= 0 ? (
+                    <TrendingUp className="h-6 w-6 text-green-600" />
+                  ) : (
+                    <TrendingDown className="h-6 w-6 text-destructive" />
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Imposto Total Devido</p>
+                  <p className="text-2xl font-bold text-primary">
+                    {formatCurrency(resumoGeral.impostoTotalDevido)}
+                  </p>
+                </div>
+                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <DollarSign className="h-6 w-6 text-primary" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Formulário */}
+          {/* Coluna Principal */}
           <div className="lg:col-span-2 space-y-6">
             {/* Upload CSV */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Upload className="h-5 w-5" />
-                  Importar Operações
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="border-2 border-dashed rounded-lg p-8 text-center">
-                  <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Arraste um arquivo CSV ou clique para selecionar
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Suportamos: Binance, Mercado Bitcoin, Foxbit
-                  </p>
-                  <Button variant="outline" className="mt-4" disabled>
-                    Em breve
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <UploadCSV onImport={handleImportCSV} />
 
-            {/* Adicionar Manual */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Plus className="h-5 w-5" />
-                  Adicionar Operação Manual
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="tipo">Tipo</Label>
-                    <select
-                      id="tipo"
-                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                      value={novaOperacao.tipo}
-                      onChange={(e) =>
-                        setNovaOperacao({
-                          ...novaOperacao,
-                          tipo: e.target.value as "compra" | "venda",
-                        })
-                      }
-                    >
-                      <option value="compra">Compra</option>
-                      <option value="venda">Venda</option>
-                    </select>
-                  </div>
+            {/* Botão Adicionar Manual */}
+            {!mostrarFormulario && (
+              <Button
+                onClick={() => setMostrarFormulario(true)}
+                variant="outline"
+                className="w-full"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Adicionar Operação Manual
+              </Button>
+            )}
 
-                  <div>
-                    <Label htmlFor="cripto">Criptomoeda</Label>
-                    <select
-                      id="cripto"
-                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                      value={novaOperacao.cripto}
-                      onChange={(e) =>
-                        setNovaOperacao({
-                          ...novaOperacao,
-                          cripto: e.target.value,
-                        })
-                      }
-                    >
-                      <option value="BTC">Bitcoin (BTC)</option>
-                      <option value="ETH">Ethereum (ETH)</option>
-                      <option value="USDT">Tether (USDT)</option>
-                      <option value="SOL">Solana (SOL)</option>
-                      <option value="BNB">BNB</option>
-                    </select>
-                  </div>
+            {/* Formulário Manual */}
+            {mostrarFormulario && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Plus className="h-5 w-5" />
+                    Nova Operação
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="tipo">Tipo</Label>
+                      <select
+                        id="tipo"
+                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        value={novaOperacao.tipo}
+                        onChange={(e) =>
+                          setNovaOperacao({
+                            ...novaOperacao,
+                            tipo: e.target.value as "compra" | "venda",
+                          })
+                        }
+                      >
+                        <option value="compra">Compra</option>
+                        <option value="venda">Venda</option>
+                      </select>
+                    </div>
 
-                  <div>
-                    <Label htmlFor="quantidade">Quantidade</Label>
-                    <Input
-                      id="quantidade"
-                      type="number"
-                      step="0.00000001"
-                      placeholder="0.00000000"
-                      value={novaOperacao.quantidade}
-                      onChange={(e) =>
-                        setNovaOperacao({
-                          ...novaOperacao,
-                          quantidade: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
+                    <div>
+                      <Label htmlFor="cripto">Criptomoeda</Label>
+                      <select
+                        id="cripto"
+                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        value={novaOperacao.cripto}
+                        onChange={(e) =>
+                          setNovaOperacao({
+                            ...novaOperacao,
+                            cripto: e.target.value,
+                          })
+                        }
+                      >
+                        {CRIPTOS_DISPONIVEIS.map((c) => (
+                          <option key={c.value} value={c.value}>
+                            {c.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-                  <div>
-                    <Label htmlFor="valorTotal">Valor Total (BRL)</Label>
-                    <Input
-                      id="valorTotal"
-                      type="number"
-                      step="0.01"
-                      placeholder="0,00"
-                      value={novaOperacao.valorTotal}
-                      onChange={(e) =>
-                        setNovaOperacao({
-                          ...novaOperacao,
-                          valorTotal: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
+                    <div>
+                      <Label htmlFor="quantidade">Quantidade</Label>
+                      <Input
+                        id="quantidade"
+                        type="number"
+                        step="0.00000001"
+                        placeholder="0.00000000"
+                        value={novaOperacao.quantidade}
+                        onChange={(e) =>
+                          setNovaOperacao({
+                            ...novaOperacao,
+                            quantidade: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
 
-                  <div>
-                    <Label htmlFor="data">Data</Label>
-                    <Input
-                      id="data"
-                      type="date"
-                      value={novaOperacao.data}
-                      onChange={(e) =>
-                        setNovaOperacao({
-                          ...novaOperacao,
-                          data: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
+                    <div>
+                      <Label htmlFor="valorTotal">Valor Total (BRL)</Label>
+                      <Input
+                        id="valorTotal"
+                        type="number"
+                        step="0.01"
+                        placeholder="0,00"
+                        value={novaOperacao.valorTotal}
+                        onChange={(e) =>
+                          setNovaOperacao({
+                            ...novaOperacao,
+                            valorTotal: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
 
-                  <div className="flex items-end">
-                    <Button onClick={adicionarOperacao} className="w-full">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Adicionar
-                    </Button>
+                    <div>
+                      <Label htmlFor="data">Data</Label>
+                      <Input
+                        id="data"
+                        type="date"
+                        value={novaOperacao.data}
+                        onChange={(e) =>
+                          setNovaOperacao({
+                            ...novaOperacao,
+                            data: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+
+                    <div className="flex items-end gap-2">
+                      <Button onClick={adicionarOperacao} className="flex-1">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Adicionar
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setMostrarFormulario(false)}
+                      >
+                        Cancelar
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Gráficos */}
+            {operacoes.length > 0 && <GraficoResumo dados={dadosGrafico} />}
 
             {/* Lista de Operações */}
             {operacoes.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Operações Registradas</CardTitle>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>Operações Registradas</span>
+                    <span className="text-sm font-normal text-muted-foreground">
+                      {operacoes.length} operações
+                    </span>
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
-                    {operacoes.map((op) => (
-                      <div
-                        key={op.id}
-                        className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
-                      >
-                        <div className="flex items-center gap-3">
-                          {op.tipo === "compra" ? (
-                            <TrendingUp className="h-5 w-5 text-green-600" />
-                          ) : (
-                            <TrendingDown className="h-5 w-5 text-red-600" />
-                          )}
-                          <div>
-                            <p className="font-medium">
-                              {op.tipo === "compra" ? "Compra" : "Venda"} de{" "}
-                              {op.quantidade} {op.cripto}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {new Date(op.data).toLocaleDateString("pt-BR")}
-                            </p>
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {[...operacoes]
+                      .sort(
+                        (a, b) =>
+                          new Date(b.data).getTime() - new Date(a.data).getTime()
+                      )
+                      .map((op) => (
+                        <div
+                          key={op.id}
+                          className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            {op.tipo === "compra" ? (
+                              <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
+                                <TrendingUp className="h-5 w-5 text-green-600" />
+                              </div>
+                            ) : (
+                              <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
+                                <TrendingDown className="h-5 w-5 text-red-600" />
+                              </div>
+                            )}
+                            <div>
+                              <p className="font-medium">
+                                {op.tipo === "compra" ? "Compra" : "Venda"} de{" "}
+                                {formatCrypto(op.quantidade)} {op.cripto}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {new Date(op.data).toLocaleDateString("pt-BR")}
+                                {op.exchange && ` • ${op.exchange}`}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="text-right">
+                              <p className="font-semibold">
+                                {formatCurrency(op.valorTotal)}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {formatCurrency(op.precoUnitario)}/unid
+                              </p>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removerOperacao(op.id)}
+                              className="text-muted-foreground hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
                         </div>
-                        <div className="flex items-center gap-4">
-                          <span className="font-semibold">
-                            {formatCurrency(op.valorTotal)}
-                          </span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removerOperacao(op.id)}
-                          >
-                            Remover
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
+                      ))}
                   </div>
                 </CardContent>
               </Card>
             )}
           </div>
 
-          {/* Resumo */}
+          {/* Sidebar */}
           <div className="space-y-6">
+            {/* Resumo do Mês */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <DollarSign className="h-5 w-5" />
-                  Resumo do Mês
+                  Resumo do Mês Atual
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Total de Vendas</span>
                   <span className="font-semibold">
-                    {formatCurrency(resumo.totalVendas)}
+                    {formatCurrency(resumoMesAtual.totalVendas)}
                   </span>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Limite de Isenção</span>
+                  <span className="font-semibold">
+                    {formatCurrency(LIMITE_ISENCAO_MENSAL)}
+                  </span>
+                </div>
+
+                <div className="w-full bg-muted rounded-full h-2">
+                  <div
+                    className={`h-2 rounded-full transition-all ${
+                      resumoMesAtual.totalVendas > LIMITE_ISENCAO_MENSAL
+                        ? "bg-destructive"
+                        : "bg-primary"
+                    }`}
+                    style={{
+                      width: `${Math.min(
+                        100,
+                        (resumoMesAtual.totalVendas / LIMITE_ISENCAO_MENSAL) * 100
+                      )}%`,
+                    }}
+                  />
                 </div>
 
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Lucro/Prejuízo</span>
                   <span
                     className={`font-semibold ${
-                      resumo.lucroTotal >= 0 ? "text-green-600" : "text-red-600"
+                      resumoMesAtual.lucroTotal >= 0
+                        ? "text-green-600"
+                        : "text-destructive"
                     }`}
                   >
-                    {formatCurrency(resumo.lucroTotal)}
+                    {formatCurrency(resumoMesAtual.lucroTotal)}
                   </span>
                 </div>
 
                 <div className="border-t pt-4">
-                  {resumo.isento ? (
-                    <div className="flex items-start gap-2 p-3 rounded-lg bg-green-50 text-green-800">
-                      <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                  {resumoMesAtual.isento ? (
+                    <div className="flex items-start gap-2 p-3 rounded-lg bg-green-50 text-green-800 dark:bg-green-950 dark:text-green-200">
+                      <CheckCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
                       <div>
                         <p className="font-medium">Isento de IR</p>
                         <p className="text-sm">
@@ -336,33 +526,49 @@ export default function CalculadoraPage() {
                       </div>
                     </div>
                   ) : (
-                    <div className="flex justify-between items-center">
-                      <span className="text-muted-foreground">
-                        Imposto Devido
-                      </span>
-                      <span className="text-xl font-bold text-primary">
-                        {formatCurrency(resumo.impostoDevido)}
-                      </span>
+                    <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-200">
+                      <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-medium">Imposto Devido</p>
+                        <p className="text-2xl font-bold">
+                          {formatCurrency(resumoMesAtual.impostoDevido)}
+                        </p>
+                        <p className="text-sm">
+                          Vencimento: último dia útil do mês seguinte
+                        </p>
+                      </div>
                     </div>
                   )}
                 </div>
               </CardContent>
             </Card>
 
+            {/* Portfolio */}
+            <PortfolioCard portfolio={resumoGeral.portfolio} />
+
+            {/* Regras */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Regras do IR</CardTitle>
               </CardHeader>
-              <CardContent className="text-sm text-muted-foreground space-y-2">
-                <p>
-                  <strong>Isenção:</strong> Vendas até R$ 35.000/mês
-                </p>
-                <p>
-                  <strong>Alíquota:</strong> 15% sobre ganho de capital
-                </p>
-                <p>
-                  <strong>Vencimento:</strong> Último dia útil do mês seguinte
-                </p>
+              <CardContent className="text-sm text-muted-foreground space-y-3">
+                <div className="p-3 bg-muted/50 rounded-lg">
+                  <p className="font-medium text-foreground">Isenção</p>
+                  <p>Vendas até R$ 35.000/mês são isentas</p>
+                </div>
+                <div className="p-3 bg-muted/50 rounded-lg">
+                  <p className="font-medium text-foreground">Alíquotas</p>
+                  <ul className="mt-1 space-y-1">
+                    <li>Até R$ 5M: 15%</li>
+                    <li>R$ 5M a 10M: 17,5%</li>
+                    <li>R$ 10M a 30M: 20%</li>
+                    <li>Acima R$ 30M: 22,5%</li>
+                  </ul>
+                </div>
+                <div className="p-3 bg-muted/50 rounded-lg">
+                  <p className="font-medium text-foreground">Vencimento</p>
+                  <p>Último dia útil do mês seguinte à venda</p>
+                </div>
               </CardContent>
             </Card>
           </div>
