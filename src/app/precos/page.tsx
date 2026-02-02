@@ -1,5 +1,16 @@
+import { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Check, Zap, Crown, Building2 } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Preços e Planos",
+  description:
+    "Conheça os planos do Meu Imposto Cripto. Versão gratuita disponível. Planos Pro e Contador para traders ativos e profissionais.",
+  openGraph: {
+    title: "Preços - Meu Imposto Cripto",
+    description: "Planos simples e transparentes para calcular IR de cripto",
+  },
+};
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 

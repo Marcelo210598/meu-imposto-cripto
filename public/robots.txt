@@ -1,0 +1,10 @@
+# Robots.txt - Meu Imposto Cripto
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://workspace-tau-olive.vercel.app/sitemap.xml
+
+# LLMs.txt para IAs
+# https://workspace-tau-olive.vercel.app/llms.txt

@@ -1,5 +1,16 @@
+import { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, HelpCircle, ChevronDown } from "lucide-react";
+import { ArrowLeft, HelpCircle } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Perguntas Frequentes sobre IR de Criptomoedas",
+  description:
+    "Tire suas dúvidas sobre tributação de criptomoedas no Brasil. Regras de isenção, alíquotas, GCAP, prazos e muito mais.",
+  openGraph: {
+    title: "FAQ - Imposto de Renda Criptomoedas",
+    description: "Tire suas dúvidas sobre tributação de criptomoedas no Brasil",
+  },
+};
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 

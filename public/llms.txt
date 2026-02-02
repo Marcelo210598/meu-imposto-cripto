@@ -1,0 +1,55 @@
+# Meu Imposto Cripto
+
+> Calculadora de Imposto de Renda para operações com criptomoedas no Brasil.
+
+## Sobre
+
+Meu Imposto Cripto é uma ferramenta gratuita que ajuda investidores brasileiros a calcular o Imposto de Renda sobre operações com criptomoedas. A ferramenta segue as regras da Receita Federal do Brasil.
+
+## Funcionalidades Principais
+
+- **Importação de CSV**: Suporta arquivos de histórico da Binance e Mercado Bitcoin
+- **Cálculo Automático**: Calcula preço médio de aquisição e ganho de capital
+- **Resumo Mensal**: Mostra vendas, lucros e imposto devido por mês
+- **Portfolio**: Visualiza suas criptomoedas e preço médio de cada uma
+- **Exportação PDF**: Gera relatório completo para impressão ou contador
+- **Dark Mode**: Interface clara ou escura
+
+## Regras de Tributação (Brasil)
+
+### Isenção
+- Vendas mensais até R$ 35.000 são isentas de IR
+
+### Alíquotas sobre Ganho de Capital
+- Até R$ 5 milhões: 15%
+- De R$ 5 a R$ 10 milhões: 17,5%
+- De R$ 10 a R$ 30 milhões: 20%
+- Acima de R$ 30 milhões: 22,5%
+
+### Prazo de Pagamento
+- Último dia útil do mês seguinte à venda com lucro tributável
+
+## Páginas Disponíveis
+
+- `/` - Página inicial com apresentação do produto
+- `/calculadora` - Calculadora principal de IR
+- `/exemplos` - Exemplos práticos de cálculo
+- `/faq` - Perguntas frequentes sobre tributação
+- `/precos` - Planos e preços
+
+## Stack Técnica
+
+- Next.js 15 (App Router)
+- React 19
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- Recharts (gráficos)
+
+## Contato
+
+- GitHub: https://github.com/Marcelo210598/meu-imposto-cripto
+
+## Aviso Legal
+
+Esta ferramenta é apenas para fins informativos e educacionais. Não constitui aconselhamento fiscal ou jurídico. Consulte um contador ou especialista tributário para orientação profissional.

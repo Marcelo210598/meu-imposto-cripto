@@ -1,5 +1,16 @@
+import { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Calculator, TrendingUp, Check } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Exemplos de Cálculo de IR para Criptomoedas",
+  description:
+    "Aprenda a calcular imposto de renda sobre criptomoedas com exemplos práticos. Veja casos de isenção, tributação e prejuízo.",
+  openGraph: {
+    title: "Exemplos de Cálculo - IR Criptomoedas",
+    description: "Exemplos práticos de cálculo de imposto sobre criptomoedas",
+  },
+};
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
