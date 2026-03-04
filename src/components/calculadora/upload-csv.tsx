@@ -9,15 +9,17 @@ import { Operacao } from "@/lib/types";
 
 interface UploadCSVProps {
   onImport: (operacoes: Operacao[]) => void;
+  disabled?: boolean;
 }
 
-export function UploadCSV({ onImport }: UploadCSVProps) {
+export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
 
   const handleFile = useCallback(
     async (file: File) => {
+      if (disabled) return;
       if (!file.name.endsWith(".csv")) {
         setStatus("error");
         setMessage("Por favor, selecione um arquivo CSV");
@@ -153,14 +155,20 @@ export function UploadCSV({ onImport }: UploadCSVProps) {
           )}
         </div>
 
-        <div className="mt-4 p-4 bg-muted/50 rounded-lg">
-          <p className="text-sm font-medium mb-2">Como exportar seu CSV:</p>
-          <ul className="text-xs text-muted-foreground space-y-1">
+        <div className="mt-4 p-4 bg-muted/50 rounded-lg space-y-2">
+          <p className="text-sm font-medium">Como exportar seu CSV:</p>
+          <ul className="text-xs text-muted-foreground space-y-2">
             <li>
-              <strong>Binance:</strong> Trade History → Export → CSV
+              <strong className="text-foreground">Binance:</strong>{" "}
+              Carteira → Histórico de Negociações → Exportar → CSV
+              <br />
+              <span className="text-amber-600 dark:text-amber-400">
+                ⚠ Use &quot;Trade History&quot; (não Transaction History) — precisa do valor em BRL/USDT
+              </span>
             </li>
             <li>
-              <strong>Mercado Bitcoin:</strong> Histórico → Exportar
+              <strong className="text-foreground">Mercado Bitcoin:</strong>{" "}
+              Histórico → Exportar relatório
             </li>
           </ul>
         </div>

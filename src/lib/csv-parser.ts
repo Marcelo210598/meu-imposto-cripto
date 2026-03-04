@@ -83,19 +83,12 @@ function parseBinanceTransactionHistory(lines: string[]): Operacao[] {
       const tipo = operationLower.includes("buy") ? "compra" : "venda";
       const quantidade = Math.abs(parseFloat(change.replace(",", ".")) || 0);
 
-      // Nota: Neste formato não temos o valor em BRL, seria necessário buscar cotação
-      // Por agora, vamos pular registros sem valor
+      // Neste formato não temos o valor em BRL diretamente
+      // Ignoramos registros sem valor monetário (evita cálculos incorretos de IR)
       if (quantidade > 0) {
-        operacoes.push({
-          id: `binance-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          tipo,
-          cripto: coin.toUpperCase(),
-          quantidade,
-          valorTotal: 0, // Precisa ser preenchido manualmente ou via API
-          precoUnitario: 0,
-          data: formatarData(utcTime),
-          exchange: "Binance",
-        });
+        // Pular se não tiver valor — usuário deve usar o formato Trade History
+        // que contém o campo "Amount" com valor em BRL/USDT
+        continue;
       }
     } catch (e) {
       console.error("Erro ao parsear linha:", line, e);
