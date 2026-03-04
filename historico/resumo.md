@@ -1,6 +1,6 @@
 # Meu Imposto Cripto - Resumo do Projeto
 
-> Última atualização: 02/02/2025
+> Última atualização: 04/03/2026
 
 ## 🎯 Objetivo
 
@@ -22,6 +22,10 @@ Calculadora de Imposto de Renda para operações com criptomoedas no Brasil, seg
 | Tailwind CSS | 3.4 | Estilização |
 | shadcn/ui | new-york | Componentes UI |
 | Recharts | 2.15 | Gráficos |
+| Prisma | 5.x | ORM |
+| Neon PostgreSQL | - | Banco de dados |
+| NextAuth | v5 beta | Autenticação |
+| bcryptjs | - | Hash de senhas |
 | Vercel | - | Deploy |
 
 ## 📊 Status do Projeto
@@ -42,12 +46,20 @@ Calculadora de Imposto de Renda para operações com criptomoedas no Brasil, seg
 - [x] Exemplos de cálculo
 - [x] Página de preços
 
-### Pendente 🚧
-- [ ] Backend (Neon PostgreSQL)
-- [ ] Autenticação
-- [ ] Mais exchanges
+### Sprint 1 ✅ (04/03/2026)
+- [x] Prisma + Neon PostgreSQL
+- [x] NextAuth v5 (login/register)
+- [x] API /api/operacoes (GET/POST/DELETE)
+- [x] Calculadora: DB para logados, localStorage para guests (limite 50)
+- [x] Página /legislacao (lei brasileira, DeCripto, FAQ)
+- [x] Header com auth state e menu de usuário
+
+### Pendente 🚧 (Sprint 2)
+- [ ] Deploy Vercel com env vars configuradas
+- [ ] Geração de DARF (PDF automático)
+- [ ] Mais exchanges (Foxbit, Coinbase, NovaDAX)
 - [ ] Exportação GCAP
-- [ ] Pagamentos
+- [ ] Pagamentos (Stripe — Sprint 3)
 
 ## 💰 Regras de IR (Brasil)
 
@@ -99,6 +111,13 @@ src/
 ## 🔑 Variáveis de ambiente
 
 ```env
+# Banco de dados (Neon — pooler)
+DATABASE_URL="postgresql://...pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require&pgbouncer=true&connect_timeout=30"
+
+# Auth
+AUTH_SECRET="..."
+AUTH_URL="http://localhost:3000"  # ou https://... em produção
+
 # Analytics (opcional)
 NEXT_PUBLIC_PLAUSIBLE_DOMAIN=workspace-tau-olive.vercel.app
 NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
@@ -109,6 +128,7 @@ NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 | Data | Principais entregas |
 |------|---------------------|
 | 02/02/2025 | Projeto criado do zero, 3 fases implementadas, SEO, Analytics |
+| 04/03/2026 | Sprint 1: auth, Neon DB, API operacoes, legislação, CSV fixes |
 
 ---
 
