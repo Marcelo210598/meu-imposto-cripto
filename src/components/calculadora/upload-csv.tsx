@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Upload, FileText, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Upload, FileText, AlertCircle, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { parseCSV } from "@/lib/csv-parser";
@@ -12,10 +12,68 @@ interface UploadCSVProps {
   disabled?: boolean;
 }
 
+const EXCHANGES = [
+  {
+    nome: "Binance",
+    instrucoes: "Carteira → Histórico de Negociações → Exportar → CSV",
+    aviso: 'Use "Trade History" (não Transaction History) — precisa do valor em BRL/USDT',
+    tipo: "br" as const,
+  },
+  {
+    nome: "Mercado Bitcoin",
+    instrucoes: "Histórico → Exportar relatório",
+    aviso: null,
+    tipo: "br" as const,
+  },
+  {
+    nome: "Foxbit",
+    instrucoes: "Conta → Histórico de Ordens → Exportar CSV",
+    aviso: null,
+    tipo: "br" as const,
+  },
+  {
+    nome: "NovaDAX",
+    instrucoes: "Conta → Histórico → Exportar",
+    aviso: null,
+    tipo: "br" as const,
+  },
+  {
+    nome: "Bybit",
+    instrucoes: "Assets → Spot → Order History → Export",
+    aviso: "Valores em USDT — você precisará converter para BRL após importar",
+    tipo: "int" as const,
+  },
+  {
+    nome: "Bitget",
+    instrucoes: "Orders → Spot Orders → Export",
+    aviso: "Valores em USDT — converter para BRL após importar",
+    tipo: "int" as const,
+  },
+  {
+    nome: "OKX",
+    instrucoes: "Trade → Order History → Export",
+    aviso: "Valores em USDT — converter para BRL após importar",
+    tipo: "int" as const,
+  },
+  {
+    nome: "Coinbase",
+    instrucoes: "Reports → Generate → Transaction History → CSV",
+    aviso: "Valores em USD — converter para BRL após importar",
+    tipo: "int" as const,
+  },
+  {
+    nome: "Kraken",
+    instrucoes: "History → Export → Trades → CSV",
+    aviso: "Valores podem estar em USD — verificar após importar",
+    tipo: "int" as const,
+  },
+];
+
 export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [mostrarInstrucoes, setMostrarInstrucoes] = useState(false);
 
   const handleFile = useCallback(
     async (file: File) => {
@@ -42,7 +100,6 @@ export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
         setMessage(`${operacoes.length} operações importadas com sucesso!`);
         onImport(operacoes);
 
-        // Reset status após 3 segundos
         setTimeout(() => {
           setStatus("idle");
           setMessage("");
@@ -53,14 +110,13 @@ export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
         console.error(error);
       }
     },
-    [onImport]
+    [onImport, disabled]
   );
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
       setIsDragging(false);
-
       const file = e.dataTransfer.files[0];
       if (file) handleFile(file);
     },
@@ -84,15 +140,19 @@ export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
     [handleFile]
   );
 
+  const brExchanges = EXCHANGES.filter((e) => e.tipo === "br");
+  const intExchanges = EXCHANGES.filter((e) => e.tipo === "int");
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Upload className="h-5 w-5" />
-          Importar Operações
+          Importar Operações via CSV
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
+        {/* Área de drop */}
         <div
           className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
             isDragging
@@ -110,7 +170,7 @@ export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
                 Arraste um arquivo CSV ou clique para selecionar
               </p>
               <p className="text-xs text-muted-foreground mb-4">
-                Suportamos: Binance, Mercado Bitcoin
+                9 exchanges suportadas — detecção automática de formato
               </p>
               <label>
                 <input
@@ -118,8 +178,9 @@ export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
                   accept=".csv"
                   className="hidden"
                   onChange={handleInputChange}
+                  disabled={disabled}
                 />
-                <Button variant="outline" asChild>
+                <Button variant="outline" asChild disabled={disabled}>
                   <span className="cursor-pointer">
                     <FileText className="h-4 w-4 mr-2" />
                     Selecionar Arquivo
@@ -155,23 +216,60 @@ export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
           )}
         </div>
 
-        <div className="mt-4 p-4 bg-muted/50 rounded-lg space-y-2">
-          <p className="text-sm font-medium">Como exportar seu CSV:</p>
-          <ul className="text-xs text-muted-foreground space-y-2">
-            <li>
-              <strong className="text-foreground">Binance:</strong>{" "}
-              Carteira → Histórico de Negociações → Exportar → CSV
-              <br />
-              <span className="text-amber-600 dark:text-amber-400">
-                ⚠ Use &quot;Trade History&quot; (não Transaction History) — precisa do valor em BRL/USDT
-              </span>
-            </li>
-            <li>
-              <strong className="text-foreground">Mercado Bitcoin:</strong>{" "}
-              Histórico → Exportar relatório
-            </li>
-          </ul>
-        </div>
+        {/* Instruções colapsáveis */}
+        <button
+          className="w-full flex items-center justify-between text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          onClick={() => setMostrarInstrucoes(!mostrarInstrucoes)}
+        >
+          <span>Como exportar o CSV da sua exchange?</span>
+          {mostrarInstrucoes ? (
+            <ChevronUp className="h-4 w-4" />
+          ) : (
+            <ChevronDown className="h-4 w-4" />
+          )}
+        </button>
+
+        {mostrarInstrucoes && (
+          <div className="space-y-4 pt-2">
+            {/* Exchanges brasileiras */}
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                Exchanges BR — valores em BRL ✅
+              </p>
+              <ul className="space-y-2">
+                {brExchanges.map((ex) => (
+                  <li key={ex.nome} className="text-xs p-3 rounded-lg bg-muted/50">
+                    <strong className="text-foreground">{ex.nome}:</strong>{" "}
+                    {ex.instrucoes}
+                    {ex.aviso && (
+                      <p className="mt-1 text-amber-600 dark:text-amber-400">
+                        ⚠ {ex.aviso}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Exchanges internacionais */}
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                Exchanges Internacionais — valores em USDT/USD ⚠
+              </p>
+              <div className="text-xs p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-300 mb-2">
+                ⚠ Exchanges internacionais registram valores em USDT ou USD. Após importar, os valores aparecerão em USDT/USD e você precisará ajustar para BRL usando a cotação PTAX do Banco Central na data da operação.
+              </div>
+              <ul className="space-y-2">
+                {intExchanges.map((ex) => (
+                  <li key={ex.nome} className="text-xs p-3 rounded-lg bg-muted/50">
+                    <strong className="text-foreground">{ex.nome}:</strong>{" "}
+                    {ex.instrucoes}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -32,6 +32,7 @@ import {
 import { UploadCSV } from "@/components/calculadora/upload-csv";
 import { GraficoResumo } from "@/components/calculadora/grafico-resumo";
 import { PortfolioCard } from "@/components/calculadora/portfolio-card";
+import { DarfModal } from "@/components/calculadora/darf-modal";
 import { exportarPDF } from "@/lib/export-pdf";
 
 const CRIPTOS_DISPONIVEIS = [
@@ -680,6 +681,11 @@ export default function CalculadoraPage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* DARF */}
+            {resumosMensais.some((r) => r.impostoDevido > 0) && (
+              <DarfModal resumosMensais={resumosMensais} />
+            )}
 
             {/* Portfolio */}
             <PortfolioCard portfolio={resumoGeral.portfolio} />

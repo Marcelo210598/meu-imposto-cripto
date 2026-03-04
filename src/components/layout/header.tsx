@@ -97,6 +97,14 @@ export function Header() {
                     >
                       Minha calculadora
                     </Link>
+                    <Link
+                      href="/perfil"
+                      className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted transition-colors"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      <User className="h-4 w-4" />
+                      Minha conta
+                    </Link>
                     <button
                       onClick={handleSignOut}
                       className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted transition-colors w-full text-left text-destructive"
