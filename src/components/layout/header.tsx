@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Bitcoin, Menu, X, LogOut, User, ChevronDown } from "lucide-react";
+import { Bitcoin, Menu, X, LogOut, User, ChevronDown, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useState } from "react";
@@ -58,6 +58,14 @@ export function Header() {
           >
             Preços
           </Link>
+          {session && (
+            <Link
+              href="/relatorio"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Relatório IRPF
+            </Link>
+          )}
         </nav>
 
         <div className="hidden md:flex items-center gap-2">
@@ -96,6 +104,14 @@ export function Header() {
                       onClick={() => setIsUserMenuOpen(false)}
                     >
                       Minha calculadora
+                    </Link>
+                    <Link
+                      href="/relatorio"
+                      className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted transition-colors"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      <FileText className="h-4 w-4" />
+                      Relatório IRPF
                     </Link>
                     <Link
                       href="/perfil"
@@ -184,6 +200,15 @@ export function Header() {
             >
               Preços
             </Link>
+            {session && (
+              <Link
+                href="/relatorio"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Relatório IRPF
+              </Link>
+            )}
             <div className="pt-4 border-t space-y-2">
               {session ? (
                 <Button

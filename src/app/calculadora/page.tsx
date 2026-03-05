@@ -16,6 +16,7 @@ import {
   FileDown,
   CloudUpload,
   Lock,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -238,6 +239,14 @@ export default function CalculadoraPage() {
                 <CloudUpload className="h-3 w-3" />
                 Salvo na nuvem
               </span>
+            )}
+            {isLoggedIn && operacoes.length > 0 && (
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/relatorio">
+                  <FileText className="h-4 w-4 mr-2" />
+                  IRPF
+                </Link>
+              </Button>
             )}
             {operacoes.length > 0 && (
               <>

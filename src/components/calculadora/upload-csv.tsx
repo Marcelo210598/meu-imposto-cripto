@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Upload, FileText, AlertCircle, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  Upload, FileText, AlertCircle, CheckCircle2,
+  ChevronDown, ChevronUp, RefreshCw, DollarSign, X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { parseCSV } from "@/lib/csv-parser";
@@ -69,11 +72,76 @@ const EXCHANGES = [
   },
 ];
 
+const EXCHANGES_INTERNACIONAIS = ["Bybit (USDT)", "Bitget (USDT)", "OKX (USDT)", "Coinbase (USD)", "Kraken"];
+
 export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
   const [mostrarInstrucoes, setMostrarInstrucoes] = useState(false);
+
+  // PTAX flow
+  const [pendingOps, setPendingOps] = useState<Operacao[] | null>(null);
+  const [convertendo, setConvertendo] = useState(false);
+  const [cotacoes, setCotacoes] = useState<Record<string, number>>({});
+  const [ptaxCarregado, setPtaxCarregado] = useState(false);
+
+  const isInternacional = (op: Operacao) =>
+    EXCHANGES_INTERNACIONAIS.some((ex) => op.exchange?.startsWith(ex.split(" ")[0]));
+
+  const buscarPTAX = useCallback(async (ops: Operacao[]) => {
+    setConvertendo(true);
+    try {
+      const datasUnicas = [
+        ...new Set(ops.filter(isInternacional).map((op) => op.data)),
+      ];
+
+      if (datasUnicas.length === 0) return;
+
+      const res = await fetch(`/api/ptax?datas=${datasUnicas.join(",")}`);
+      if (!res.ok) throw new Error("Falha ao buscar PTAX");
+
+      const json = await res.json();
+      setCotacoes(json.cotacoes ?? {});
+      setPtaxCarregado(true);
+    } catch {
+      setCotacoes({});
+    } finally {
+      setConvertendo(false);
+    }
+  }, []);
+
+  const confirmarImportacao = useCallback(() => {
+    if (!pendingOps) return;
+
+    const convertidas = pendingOps.map((op) => {
+      if (isInternacional(op) && cotacoes[op.data]) {
+        const fator = cotacoes[op.data];
+        return {
+          ...op,
+          valorTotal: parseFloat((op.valorTotal * fator).toFixed(2)),
+          precoUnitario: parseFloat((op.precoUnitario * fator).toFixed(2)),
+          exchange: op.exchange?.replace(" (USDT)", " (convertido)").replace(" (USD)", " (convertido)"),
+        };
+      }
+      return op;
+    });
+
+    onImport(convertidas);
+    setPendingOps(null);
+    setCotacoes({});
+    setPtaxCarregado(false);
+    setStatus("success");
+    setMessage(`${convertidas.length} operações importadas com sucesso!`);
+    setTimeout(() => { setStatus("idle"); setMessage(""); }, 3000);
+  }, [pendingOps, cotacoes, onImport]);
+
+  const cancelarImportacao = () => {
+    setPendingOps(null);
+    setCotacoes({});
+    setPtaxCarregado(false);
+    setStatus("idle");
+  };
 
   const handleFile = useCallback(
     async (file: File) => {
@@ -90,20 +158,23 @@ export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
 
         if (operacoes.length === 0) {
           setStatus("error");
-          setMessage(
-            "Nenhuma operação encontrada. Verifique o formato do arquivo."
-          );
+          setMessage("Nenhuma operação encontrada. Verifique o formato do arquivo.");
           return;
         }
 
+        const temInternacional = operacoes.some(isInternacional);
+        if (temInternacional) {
+          // Mostra etapa de conversão PTAX
+          setPendingOps(operacoes);
+          setCotacoes({});
+          setPtaxCarregado(false);
+          return;
+        }
+
+        onImport(operacoes);
         setStatus("success");
         setMessage(`${operacoes.length} operações importadas com sucesso!`);
-        onImport(operacoes);
-
-        setTimeout(() => {
-          setStatus("idle");
-          setMessage("");
-        }, 3000);
+        setTimeout(() => { setStatus("idle"); setMessage(""); }, 3000);
       } catch (error) {
         setStatus("error");
         setMessage("Erro ao processar o arquivo. Verifique o formato.");
@@ -216,6 +287,95 @@ export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
           )}
         </div>
 
+        {/* Painel conversão PTAX */}
+        {pendingOps && (
+          <div className="rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/30 p-4 space-y-4">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start gap-2">
+                <DollarSign className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-medium text-amber-800 dark:text-amber-300 text-sm">
+                    Exchanges internacionais detectadas
+                  </p>
+                  <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
+                    {pendingOps.filter(isInternacional).length} de {pendingOps.length} operações estão em USDT/USD.
+                    Converter automaticamente usando a cotação PTAX do Banco Central?
+                  </p>
+                </div>
+              </div>
+              <button onClick={cancelarImportacao} className="text-amber-700 hover:text-amber-900">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {ptaxCarregado && Object.keys(cotacoes).length > 0 && (
+              <div className="rounded-md bg-white dark:bg-amber-950/50 p-3 space-y-1">
+                <p className="text-xs font-semibold text-amber-800 dark:text-amber-300 mb-2">
+                  Cotações PTAX carregadas (USD/BRL):
+                </p>
+                {Object.entries(cotacoes).map(([data, val]) => (
+                  <div key={data} className="flex justify-between text-xs text-amber-700 dark:text-amber-400">
+                    <span>{new Date(data + "T12:00:00").toLocaleDateString("pt-BR")}</span>
+                    <span>R$ {val?.toFixed(4) ?? "—"}</span>
+                  </div>
+                ))}
+                {Object.values(cotacoes).some((v) => !v) && (
+                  <p className="text-xs text-amber-600 mt-1">
+                    ⚠ Algumas cotações não foram encontradas — essas operações serão importadas sem conversão.
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              {!ptaxCarregado ? (
+                <>
+                  <Button
+                    size="sm"
+                    className="flex-1 bg-amber-600 hover:bg-amber-700 text-white"
+                    onClick={() => buscarPTAX(pendingOps)}
+                    disabled={convertendo}
+                  >
+                    {convertendo ? (
+                      <><RefreshCw className="h-4 w-4 mr-2 animate-spin" /> Buscando PTAX...</>
+                    ) : (
+                      <><DollarSign className="h-4 w-4 mr-2" /> Buscar PTAX e Converter</>
+                    )}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={confirmarImportacao}
+                    className="border-amber-400"
+                  >
+                    Importar sem converter
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    size="sm"
+                    className="flex-1 bg-amber-600 hover:bg-amber-700 text-white"
+                    onClick={confirmarImportacao}
+                  >
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                    Confirmar e importar ({pendingOps.length} operações)
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => buscarPTAX(pendingOps)}
+                    className="border-amber-400"
+                    disabled={convertendo}
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Instruções colapsáveis */}
         <button
           className="w-full flex items-center justify-between text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
@@ -257,7 +417,7 @@ export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
                 Exchanges Internacionais — valores em USDT/USD ⚠
               </p>
               <div className="text-xs p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-300 mb-2">
-                ⚠ Exchanges internacionais registram valores em USDT ou USD. Após importar, os valores aparecerão em USDT/USD e você precisará ajustar para BRL usando a cotação PTAX do Banco Central na data da operação.
+                ✨ Ao importar, o sistema detecta automaticamente a exchange e oferece conversão USDT/USD→BRL usando a cotação PTAX oficial do Banco Central na data de cada operação.
               </div>
               <ul className="space-y-2">
                 {intExchanges.map((ex) => (
