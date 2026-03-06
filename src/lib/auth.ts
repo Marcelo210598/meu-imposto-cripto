@@ -3,10 +3,12 @@ import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "./db";
 import bcrypt from "bcryptjs";
+import { authConfig } from "./auth.config";
+import { auditLog } from "./audit";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
   adapter: PrismaAdapter(prisma),
-  session: { strategy: "jwt" },
   providers: [
     Credentials({
       credentials: {
@@ -20,35 +22,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           where: { email: credentials.email as string },
         });
 
-        if (!user || !user.password) return null;
+        if (!user || !user.password) {
+          await auditLog({ action: "login_failed", metadata: { reason: "user_not_found" } });
+          return null;
+        }
 
         const valid = await bcrypt.compare(
           credentials.password as string,
           user.password
         );
-        if (!valid) return null;
+
+        if (!valid) {
+          await auditLog({ action: "login_failed", userId: user.id, metadata: { reason: "wrong_password" } });
+          return null;
+        }
+
+        await auditLog({ action: "login", userId: user.id });
 
         return user;
       },
     }),
   ],
-  pages: {
-    signIn: "/login",
-  },
-  callbacks: {
-    jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.plano = (user as { plano?: string }).plano ?? "gratis";
-      }
-      return token;
-    },
-    session({ session, token }) {
-      if (token) {
-        session.user.id = token.id as string;
-        (session.user as { plano?: string }).plano = token.plano as string;
-      }
-      return session;
-    },
-  },
 });

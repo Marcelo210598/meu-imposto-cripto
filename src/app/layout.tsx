@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Analytics } from "@/components/analytics";
 import { SessionProvider } from "next-auth/react";
+import { Toaster } from "sonner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -129,6 +130,7 @@ export default function RootLayout({
         <SessionProvider>
           <ThemeProvider>{children}</ThemeProvider>
         </SessionProvider>
+        <Toaster richColors position="top-right" />
         <Analytics />
       </body>
     </html>

@@ -67,9 +67,11 @@ function parseBinanceTradeHistory(lines: string[]): Operacao[] {
   return operacoes;
 }
 
-function parseBinanceTransactionHistory(lines: string[]): Operacao[] {
-  // Formato não contém valor BRL — retorna vazio e orienta o usuário
-  return [];
+function parseBinanceTransactionHistory(_lines: string[]): Operacao[] {
+  // Transaction History (UTCTime,Account,Operation,Coin,Change,Remark)
+  // não contém valor BRL — não é possível calcular IR sem esse dado.
+  // Lança erro específico para o componente exibir instrução clara ao usuário.
+  throw new Error("BINANCE_TRANSACTION_HISTORY");
 }
 
 /** ───── MERCADO BITCOIN ──────────────────────

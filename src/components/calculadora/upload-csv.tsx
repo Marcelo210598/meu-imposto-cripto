@@ -176,9 +176,17 @@ export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
         setMessage(`${operacoes.length} operações importadas com sucesso!`);
         setTimeout(() => { setStatus("idle"); setMessage(""); }, 3000);
       } catch (error) {
-        setStatus("error");
-        setMessage("Erro ao processar o arquivo. Verifique o formato.");
-        console.error(error);
+        if (error instanceof Error && error.message === "BINANCE_TRANSACTION_HISTORY") {
+          setStatus("error");
+          setMessage(
+            'Arquivo "Transaction History" da Binance não é suportado — ele não contém o valor em BRL. ' +
+            'Exporte o "Trade History" (Histórico de Negociações → Spot → Exportar) para obter os valores corretos.'
+          );
+        } else {
+          setStatus("error");
+          setMessage("Erro ao processar o arquivo. Verifique o formato.");
+          console.error(error);
+        }
       }
     },
     [onImport, disabled]

@@ -1,6 +1,6 @@
 # Meu Imposto Cripto - Resumo do Projeto
 
-> Última atualização: 04/03/2026
+> Última atualização: 04/03/2026 (Sprint 3)
 
 ## 🎯 Objetivo
 
@@ -54,12 +54,40 @@ Calculadora de Imposto de Renda para operações com criptomoedas no Brasil, seg
 - [x] Página /legislacao (lei brasileira, DeCripto, FAQ)
 - [x] Header com auth state e menu de usuário
 
-### Pendente 🚧 (Sprint 2)
-- [ ] Deploy Vercel com env vars configuradas
-- [ ] Geração de DARF (PDF automático)
-- [ ] Mais exchanges (Foxbit, Coinbase, NovaDAX)
-- [ ] Exportação GCAP
-- [ ] Pagamentos (Stripe — Sprint 3)
+### Sprint 2 ✅ (04/03/2026)
+- [x] Deploy Vercel com env vars configuradas
+- [x] Persistência de operações no banco via API REST
+- [x] Upload CSV com detecção automática de exchange
+- [x] Suporte a múltiplas exchanges (Binance, Bybit, Coinbase...)
+- [x] Cálculo de IR integrado com dados do banco
+- [x] Dashboard com gráficos e portfolio
+
+### Sprint 3 ✅ (04/03/2026)
+- [x] PTAX automático via API oficial do Banco Central (proxy server-side)
+  - Single e bulk (Promise.all), cache 12h, retry 7 dias
+  - Formato correto: MM-DD-YYYY (quirk da API BCB)
+- [x] Conversão automática USDT/USD→BRL na importação CSV
+  - Detecção de exchanges internacionais (Bybit USDT, Coinbase USD, etc.)
+  - Painel âmbar com preview das cotações antes de confirmar
+- [x] Relatório IRPF completo (/relatorio)
+  - Seção 1: Bens e Direitos (Grupo 08 — BTC→01, ETH→02, USDT→03, outros→09)
+  - Seção 2: Ganho de Capital mês a mês (DARF/Isento/Sem vendas)
+  - Seção 3: Rendimentos Isentos (código 05 IRPF)
+  - Seção 4: Texto GCAP + exportação CSV (BOM UTF-8, ponto-e-vírgula)
+  - Impressão otimizada (CSS print-friendly)
+- [x] Navegação atualizada (header + dropdown + botão na calculadora)
+- [x] Sitemap atualizado com /relatorio
+- [x] Build limpo (19 rotas, 0 erros), deploy Vercel ✅ (commit c225382)
+
+### Sprint 4 🚧 (próximo — foco em SEGURANÇA)
+- [ ] Rate limiting nas rotas da API
+- [ ] Validação de inputs com Zod em todas as rotas
+- [ ] Security headers (CSP, X-Frame-Options, HSTS via next.config)
+- [ ] CSRF hardening
+- [ ] Session rotation + absolute timeout
+- [ ] Audit log para operações sensíveis
+- [ ] Sanitização de inputs do usuário
+- [ ] 2FA (opcional — se priorizar)
 
 ## 💰 Regras de IR (Brasil)
 
@@ -86,27 +114,37 @@ npm run dev
 
 ```
 src/
-├── app/           # Páginas (App Router)
-├── components/    # Componentes React
-│   ├── ui/        # shadcn/ui
-│   ├── layout/    # Header, Footer
-│   ├── home/      # Landing page
-│   └── calculadora/
-└── lib/           # Lógica de negócio
-    ├── calculadora.ts  # Cálculos de IR
-    ├── csv-parser.ts   # Parser de exchanges
-    └── storage.ts      # localStorage
+├── app/
+│   ├── api/
+│   │   ├── operacoes/     # CRUD operações (auth)
+│   │   ├── ptax/          # Proxy PTAX Banco Central
+│   │   └── auth/          # NextAuth handlers
+│   ├── calculadora/       # Calculadora de IR
+│   ├── relatorio/         # Relatório IRPF anual
+│   ├── legislacao/        # Lei brasileira / DeCripto
+│   ├── login/ register/   # Auth pages
+│   └── ...
+├── components/
+│   ├── ui/                # shadcn/ui
+│   ├── layout/            # Header, Footer
+│   ├── home/              # Landing page
+│   └── calculadora/       # Upload CSV, gráficos
+└── lib/
+    ├── calculadora.ts     # Cálculos de IR
+    ├── relatorio.ts       # Geração relatório IRPF/GCAP
+    ├── csv-parser.ts      # Parser de exchanges
+    └── storage.ts         # localStorage (guests)
 ```
 
 ## 📝 Commits recentes
 
 | Hash | Descrição |
 |------|-----------|
+| 0152300 | docs: snapshot Sprint 3 em historico/ |
+| c225382 | feat(sprint3): PTAX Banco Central, conversão USD→BRL, Relatório IRPF completo |
+| (sprint2) | feat(sprint2): persistência Neon, upload CSV multi-exchange, deploy Vercel |
+| (sprint1) | feat(sprint1): auth NextAuth v5, Prisma Neon, API operacoes, legislação |
 | f5298b3 | feat: adiciona OG images, favicons e analytics |
-| 7493e77 | feat: implementa SEO completo e llms.txt |
-| e2bf132 | feat: implementa 3 fases completas do projeto |
-| 0b96c8b | fix: adiciona vercel.json |
-| 4382675 | feat: implementa projeto do zero com Next.js 15 |
 
 ## 🔑 Variáveis de ambiente
 
@@ -128,7 +166,9 @@ NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 | Data | Principais entregas |
 |------|---------------------|
 | 02/02/2025 | Projeto criado do zero, 3 fases implementadas, SEO, Analytics |
-| 04/03/2026 | Sprint 1: auth, Neon DB, API operacoes, legislação, CSV fixes |
+| 04/03/2026 (sprint1) | Sprint 1: auth, Neon DB, API operacoes, legislação, CSV fixes |
+| 04/03/2026 (sprint2) | Sprint 2: deploy Vercel, persistência, upload CSV multi-exchange |
+| 04/03/2026 (sprint3) | Sprint 3: PTAX BCB, conversão USD→BRL, Relatório IRPF completo, GCAP |
 
 ---
 

@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { ptaxSingleSchema, ptaxBulkSchema } from "@/lib/schemas";
+import { rateLimit, getIp } from "@/lib/rate-limit";
 
 // Cache em memória — evita múltiplas chamadas ao BCB na mesma sessão
 const cache = new Map<string, { valor: number; timestamp: number }>();
@@ -52,20 +54,27 @@ async function buscarPTAX(data: string): Promise<number | null> {
 // GET /api/ptax?data=2024-01-15
 // GET /api/ptax?datas=2024-01-15,2024-02-20,2024-06-01  (bulk)
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
+  // Rate limiting: 30 req/min por IP (endpoint público)
+  const ip = getIp(req);
+  if (!rateLimit(`ptax:${ip}`, 30, 60_000)) {
+    return NextResponse.json(
+      { error: "Muitas requisições. Aguarde um momento." },
+      { status: 429 }
+    );
+  }
 
+  const { searchParams } = new URL(req.url);
   const dataParam = searchParams.get("data");
   const datasParam = searchParams.get("datas");
 
   // Bulk: múltiplas datas separadas por vírgula
-  if (datasParam) {
-    const datas = datasParam.split(",").filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d.trim()));
-
-    if (datas.length === 0) {
+  if (datasParam !== null) {
+    const parsed = ptaxBulkSchema.safeParse({ datas: datasParam });
+    if (!parsed.success) {
       return NextResponse.json({ error: "Nenhuma data válida" }, { status: 400 });
     }
 
-    const datasUnicas = [...new Set(datas.map((d) => d.trim()))];
+    const datasUnicas = [...new Set(parsed.data.datas)];
     const resultados: Record<string, number | null> = {};
 
     await Promise.all(
@@ -78,11 +87,12 @@ export async function GET(req: NextRequest) {
   }
 
   // Single: uma data
-  if (!dataParam || !/^\d{4}-\d{2}-\d{2}$/.test(dataParam)) {
+  const parsed = ptaxSingleSchema.safeParse({ data: dataParam ?? "" });
+  if (!parsed.success) {
     return NextResponse.json({ error: "Data inválida. Use YYYY-MM-DD" }, { status: 400 });
   }
 
-  const cotacao = await buscarPTAX(dataParam);
+  const cotacao = await buscarPTAX(parsed.data.data);
   if (!cotacao) {
     return NextResponse.json(
       { error: "Cotação PTAX não encontrada para esta data" },
@@ -90,5 +100,5 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  return NextResponse.json({ data: dataParam, cotacaoUSD: cotacao });
+  return NextResponse.json({ data: parsed.data.data, cotacaoUSD: cotacao });
 }

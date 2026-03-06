@@ -3,32 +3,25 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 import {
-  ArrowLeft,
-  Plus,
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  AlertCircle,
-  Trash2,
-  AlertTriangle,
-  CheckCircle,
-  FileDown,
-  CloudUpload,
-  Lock,
-  FileText,
+  ArrowLeft, Plus, TrendingUp, TrendingDown, DollarSign,
+  AlertCircle, Trash2, AlertTriangle, CheckCircle, FileDown,
+  CloudUpload, Lock, FileText, Search, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog, DialogContent, DialogDescription,
+  DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
 import { formatCurrency, formatCrypto } from "@/lib/utils";
 import { Operacao, LIMITE_ISENCAO_MENSAL } from "@/lib/types";
 import { salvarOperacoes, carregarOperacoes, limparOperacoes } from "@/lib/storage";
 import {
-  calcularResumoGeral,
-  calcularResumosMensais,
-  gerarDadosGrafico,
+  calcularResumoGeral, calcularResumosMensais, gerarDadosGrafico,
 } from "@/lib/calculadora";
 import { UploadCSV } from "@/components/calculadora/upload-csv";
 import { GraficoResumo } from "@/components/calculadora/grafico-resumo";
@@ -56,6 +49,13 @@ const CRIPTOS_DISPONIVEIS = [
 
 const LIMITE_FREE = 50;
 
+interface FormErrors {
+  cripto?: string;
+  quantidade?: string;
+  valorTotal?: string;
+  data?: string;
+}
+
 export default function CalculadoraPage() {
   const { data: session, status } = useSession();
   const isLoggedIn = !!session?.user?.id;
@@ -70,8 +70,12 @@ export default function CalculadoraPage() {
     valorTotal: "",
     data: new Date().toISOString().split("T")[0],
   });
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [salvando, setSalvando] = useState(false);
+  const [busca, setBusca] = useState("");
+  const [confirmLimparOpen, setConfirmLimparOpen] = useState(false);
+  const [limpando, setLimpando] = useState(false);
 
   // --- Carregar operações ---
   const carregarDados = useCallback(async () => {
@@ -82,9 +86,11 @@ export default function CalculadoraPage() {
         if (res.ok) {
           const data = await res.json();
           setOperacoes(data);
+        } else {
+          toast.error("Erro ao carregar operações");
         }
-      } catch (e) {
-        console.error(e);
+      } catch {
+        toast.error("Erro de conexão ao carregar operações");
       } finally {
         setLoadingData(false);
       }
@@ -94,30 +100,46 @@ export default function CalculadoraPage() {
   }, [isLoggedIn]);
 
   useEffect(() => {
-    if (status !== "loading") {
-      carregarDados();
-    }
+    if (status !== "loading") carregarDados();
   }, [status, carregarDados]);
 
-  // Salvar no localStorage quando não logado
   useEffect(() => {
-    if (!isLoggedIn && operacoes.length > 0) {
-      salvarOperacoes(operacoes);
-    }
+    if (!isLoggedIn && operacoes.length > 0) salvarOperacoes(operacoes);
   }, [operacoes, isLoggedIn]);
+
+  // --- Validação do formulário ---
+  const validarFormulario = (): boolean => {
+    const errors: FormErrors = {};
+    const quantidade = parseFloat(novaOperacao.quantidade);
+    const valorTotal = parseFloat(novaOperacao.valorTotal);
+    const cripto = novaOperacao.cripto === "OUTRO"
+      ? novaOperacao.criptoCustom.trim().toUpperCase()
+      : novaOperacao.cripto;
+
+    if (!cripto) errors.cripto = "Informe o símbolo da criptomoeda";
+    else if (!/^[A-Z0-9]+$/.test(cripto)) errors.cripto = "Use apenas letras maiúsculas e números (ex: BTC)";
+
+    if (!novaOperacao.quantidade) errors.quantidade = "Informe a quantidade";
+    else if (isNaN(quantidade) || quantidade <= 0) errors.quantidade = "Quantidade deve ser maior que zero";
+
+    if (!novaOperacao.valorTotal) errors.valorTotal = "Informe o valor total";
+    else if (isNaN(valorTotal) || valorTotal <= 0) errors.valorTotal = "Valor deve ser maior que zero";
+
+    if (!novaOperacao.data) errors.data = "Informe a data";
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   // --- Adicionar operação ---
   const adicionarOperacao = async () => {
-    if (!novaOperacao.quantidade || !novaOperacao.valorTotal) return;
+    if (!validarFormulario()) return;
 
     const quantidade = parseFloat(novaOperacao.quantidade);
     const valorTotal = parseFloat(novaOperacao.valorTotal);
-    const cripto =
-      novaOperacao.cripto === "OUTRO"
-        ? novaOperacao.criptoCustom.toUpperCase()
-        : novaOperacao.cripto;
-
-    if (!cripto) return;
+    const cripto = novaOperacao.cripto === "OUTRO"
+      ? novaOperacao.criptoCustom.trim().toUpperCase()
+      : novaOperacao.cripto;
 
     const operacao: Operacao = {
       id: Date.now().toString(),
@@ -140,33 +162,47 @@ export default function CalculadoraPage() {
         if (res.ok) {
           const [saved] = await res.json();
           setOperacoes((prev) => [saved, ...prev]);
+          toast.success(`${cripto} adicionado com sucesso`);
+        } else {
+          const err = await res.json();
+          toast.error(err.error ?? "Erro ao salvar operação");
+          return;
         }
+      } catch {
+        toast.error("Erro de conexão. Tente novamente.");
+        return;
       } finally {
         setSalvando(false);
       }
     } else {
       setOperacoes((prev) => [...prev, operacao]);
+      toast.success(`${cripto} adicionado`);
     }
 
     setNovaOperacao({
-      tipo: "compra",
-      cripto: "BTC",
-      criptoCustom: "",
-      quantidade: "",
-      valorTotal: "",
+      tipo: "compra", cripto: "BTC", criptoCustom: "",
+      quantidade: "", valorTotal: "",
       data: new Date().toISOString().split("T")[0],
     });
+    setFormErrors({});
     setMostrarFormulario(false);
   };
 
-  // --- Remover operação ---
+  // --- Remover operação individual ---
   const removerOperacao = async (id: string) => {
     if (isLoggedIn) {
-      await fetch(`/api/operacoes?id=${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/operacoes?id=${id}`, { method: "DELETE" });
+      if (!res.ok) {
+        toast.error("Erro ao remover operação");
+        return;
+      }
     }
-    const novasOps = operacoes.filter((op) => op.id !== id);
-    setOperacoes(novasOps);
-    if (!isLoggedIn && novasOps.length === 0) limparOperacoes();
+    setOperacoes((prev) => {
+      const novas = prev.filter((op) => op.id !== id);
+      if (!isLoggedIn && novas.length === 0) limparOperacoes();
+      return novas;
+    });
+    toast.success("Operação removida");
   };
 
   // --- Importar CSV ---
@@ -182,7 +218,12 @@ export default function CalculadoraPage() {
         if (res.ok) {
           const saved = await res.json();
           setOperacoes((prev) => [...saved, ...prev]);
+          toast.success(`${saved.length} operações importadas com sucesso`);
+        } else {
+          toast.error("Erro ao importar operações");
         }
+      } catch {
+        toast.error("Erro de conexão ao importar");
       } finally {
         setSalvando(false);
       }
@@ -191,19 +232,27 @@ export default function CalculadoraPage() {
     }
   };
 
+  // --- Limpar tudo (com bulk delete) ---
   const handleLimparTudo = async () => {
-    if (!confirm("Tem certeza que deseja remover todas as operações?")) return;
-
-    if (isLoggedIn) {
-      await Promise.all(
-        operacoes.map((op) =>
-          fetch(`/api/operacoes?id=${op.id}`, { method: "DELETE" })
-        )
-      );
-    } else {
-      limparOperacoes();
+    setLimpando(true);
+    try {
+      if (isLoggedIn) {
+        const res = await fetch("/api/operacoes?all=true", { method: "DELETE" });
+        if (!res.ok) {
+          toast.error("Erro ao limpar operações");
+          return;
+        }
+      } else {
+        limparOperacoes();
+      }
+      setOperacoes([]);
+      toast.success("Todas as operações foram removidas");
+    } catch {
+      toast.error("Erro ao limpar operações");
+    } finally {
+      setLimpando(false);
+      setConfirmLimparOpen(false);
     }
-    setOperacoes([]);
   };
 
   const resumoGeral = calcularResumoGeral(operacoes);
@@ -211,16 +260,47 @@ export default function CalculadoraPage() {
   const dadosGrafico = gerarDadosGrafico(operacoes);
   const mesAtual = new Date().toISOString().substring(0, 7);
   const resumoMesAtual = resumosMensais.find((r) => r.mes === mesAtual) || {
-    totalVendas: 0,
-    lucroTotal: 0,
-    impostoDevido: 0,
-    isento: true,
+    totalVendas: 0, lucroTotal: 0, impostoDevido: 0, isento: true,
   };
 
   const atingiuLimite = !isLoggedIn && operacoes.length >= LIMITE_FREE;
 
+  // Filtro de busca
+  const operacoesFiltradas = busca.trim()
+    ? operacoes.filter((op) =>
+        op.cripto.toLowerCase().includes(busca.toLowerCase()) ||
+        op.tipo.includes(busca.toLowerCase()) ||
+        op.exchange?.toLowerCase().includes(busca.toLowerCase())
+      )
+    : operacoes;
+
   return (
     <div className="min-h-screen bg-muted/30">
+      {/* Dialog de confirmação — limpar tudo */}
+      <Dialog open={confirmLimparOpen} onOpenChange={setConfirmLimparOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Remover todas as operações?</DialogTitle>
+            <DialogDescription>
+              Essa ação é irreversível. Todas as {operacoes.length} operações serão
+              permanentemente deletadas.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmLimparOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleLimparTudo}
+              disabled={limpando}
+            >
+              {limpando ? "Removendo..." : "Sim, remover tudo"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -258,7 +338,11 @@ export default function CalculadoraPage() {
                   <FileDown className="h-4 w-4 mr-2" />
                   PDF
                 </Button>
-                <Button variant="outline" size="sm" onClick={handleLimparTudo}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setConfirmLimparOpen(true)}
+                >
                   <Trash2 className="h-4 w-4 mr-2" />
                   Limpar
                 </Button>
@@ -319,18 +403,12 @@ export default function CalculadoraPage() {
                     {formatCurrency(resumoMesAtual.totalVendas)}
                   </p>
                 </div>
-                <div
-                  className={`h-12 w-12 rounded-full flex items-center justify-center ${
-                    resumoMesAtual.totalVendas > LIMITE_ISENCAO_MENSAL
-                      ? "bg-destructive/10"
-                      : "bg-green-100"
-                  }`}
-                >
-                  {resumoMesAtual.totalVendas > LIMITE_ISENCAO_MENSAL ? (
-                    <AlertTriangle className="h-6 w-6 text-destructive" />
-                  ) : (
-                    <CheckCircle className="h-6 w-6 text-green-600" />
-                  )}
+                <div className={`h-12 w-12 rounded-full flex items-center justify-center ${
+                  resumoMesAtual.totalVendas > LIMITE_ISENCAO_MENSAL ? "bg-destructive/10" : "bg-green-100"
+                }`}>
+                  {resumoMesAtual.totalVendas > LIMITE_ISENCAO_MENSAL
+                    ? <AlertTriangle className="h-6 w-6 text-destructive" />
+                    : <CheckCircle className="h-6 w-6 text-green-600" />}
                 </div>
               </div>
             </CardContent>
@@ -341,22 +419,16 @@ export default function CalculadoraPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Lucro Acumulado</p>
-                  <p
-                    className={`text-2xl font-bold ${
-                      resumoGeral.lucroAcumulado >= 0
-                        ? "text-green-600"
-                        : "text-destructive"
-                    }`}
-                  >
+                  <p className={`text-2xl font-bold ${
+                    resumoGeral.lucroAcumulado >= 0 ? "text-green-600" : "text-destructive"
+                  }`}>
                     {formatCurrency(resumoGeral.lucroAcumulado)}
                   </p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  {resumoGeral.lucroAcumulado >= 0 ? (
-                    <TrendingUp className="h-6 w-6 text-green-600" />
-                  ) : (
-                    <TrendingDown className="h-6 w-6 text-destructive" />
-                  )}
+                  {resumoGeral.lucroAcumulado >= 0
+                    ? <TrendingUp className="h-6 w-6 text-green-600" />
+                    : <TrendingDown className="h-6 w-6 text-destructive" />}
                 </div>
               </div>
             </CardContent>
@@ -382,10 +454,8 @@ export default function CalculadoraPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Coluna Principal */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Upload CSV */}
             <UploadCSV onImport={handleImportCSV} disabled={atingiuLimite} />
 
-            {/* Botão Adicionar Manual */}
             {!mostrarFormulario && (
               <Button
                 onClick={() => setMostrarFormulario(true)}
@@ -394,15 +464,9 @@ export default function CalculadoraPage() {
                 disabled={atingiuLimite}
               >
                 {atingiuLimite ? (
-                  <>
-                    <Lock className="h-4 w-4 mr-2" />
-                    Limite atingido — crie uma conta para continuar
-                  </>
+                  <><Lock className="h-4 w-4 mr-2" />Limite atingido — crie uma conta para continuar</>
                 ) : (
-                  <>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Adicionar Operação Manual
-                  </>
+                  <><Plus className="h-4 w-4 mr-2" />Adicionar Operação Manual</>
                 )}
               </Button>
             )}
@@ -424,12 +488,9 @@ export default function CalculadoraPage() {
                         id="tipo"
                         className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                         value={novaOperacao.tipo}
-                        onChange={(e) =>
-                          setNovaOperacao({
-                            ...novaOperacao,
-                            tipo: e.target.value as "compra" | "venda",
-                          })
-                        }
+                        onChange={(e) => setNovaOperacao({
+                          ...novaOperacao, tipo: e.target.value as "compra" | "venda",
+                        })}
                       >
                         <option value="compra">Compra</option>
                         <option value="venda">Venda</option>
@@ -440,31 +501,33 @@ export default function CalculadoraPage() {
                       <Label htmlFor="cripto">Criptomoeda</Label>
                       <select
                         id="cripto"
-                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        className={`flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring ${
+                          formErrors.cripto ? "border-destructive" : "border-input"
+                        }`}
                         value={novaOperacao.cripto}
-                        onChange={(e) =>
-                          setNovaOperacao({ ...novaOperacao, cripto: e.target.value })
-                        }
+                        onChange={(e) => {
+                          setNovaOperacao({ ...novaOperacao, cripto: e.target.value });
+                          setFormErrors((prev) => ({ ...prev, cripto: undefined }));
+                        }}
                       >
                         {CRIPTOS_DISPONIVEIS.map((c) => (
-                          <option key={c.value} value={c.value}>
-                            {c.label}
-                          </option>
+                          <option key={c.value} value={c.value}>{c.label}</option>
                         ))}
                         <option value="OUTRO">Outra (digitar)</option>
                       </select>
                       {novaOperacao.cripto === "OUTRO" && (
                         <Input
-                          className="mt-2"
+                          className={`mt-2 uppercase ${formErrors.cripto ? "border-destructive" : ""}`}
                           placeholder="Ex: KMNO, WIF, JUP..."
                           value={novaOperacao.criptoCustom}
-                          onChange={(e) =>
-                            setNovaOperacao({
-                              ...novaOperacao,
-                              criptoCustom: e.target.value,
-                            })
-                          }
+                          onChange={(e) => {
+                            setNovaOperacao({ ...novaOperacao, criptoCustom: e.target.value.toUpperCase() });
+                            setFormErrors((prev) => ({ ...prev, cripto: undefined }));
+                          }}
                         />
+                      )}
+                      {formErrors.cripto && (
+                        <p className="text-xs text-destructive mt-1">{formErrors.cripto}</p>
                       )}
                     </div>
 
@@ -476,10 +539,15 @@ export default function CalculadoraPage() {
                         step="0.00000001"
                         placeholder="0.00000000"
                         value={novaOperacao.quantidade}
-                        onChange={(e) =>
-                          setNovaOperacao({ ...novaOperacao, quantidade: e.target.value })
-                        }
+                        className={formErrors.quantidade ? "border-destructive" : ""}
+                        onChange={(e) => {
+                          setNovaOperacao({ ...novaOperacao, quantidade: e.target.value });
+                          setFormErrors((prev) => ({ ...prev, quantidade: undefined }));
+                        }}
                       />
+                      {formErrors.quantidade && (
+                        <p className="text-xs text-destructive mt-1">{formErrors.quantidade}</p>
+                      )}
                     </div>
 
                     <div>
@@ -490,10 +558,15 @@ export default function CalculadoraPage() {
                         step="0.01"
                         placeholder="0,00"
                         value={novaOperacao.valorTotal}
-                        onChange={(e) =>
-                          setNovaOperacao({ ...novaOperacao, valorTotal: e.target.value })
-                        }
+                        className={formErrors.valorTotal ? "border-destructive" : ""}
+                        onChange={(e) => {
+                          setNovaOperacao({ ...novaOperacao, valorTotal: e.target.value });
+                          setFormErrors((prev) => ({ ...prev, valorTotal: undefined }));
+                        }}
                       />
+                      {formErrors.valorTotal && (
+                        <p className="text-xs text-destructive mt-1">{formErrors.valorTotal}</p>
+                      )}
                     </div>
 
                     <div>
@@ -502,24 +575,28 @@ export default function CalculadoraPage() {
                         id="data"
                         type="date"
                         value={novaOperacao.data}
-                        onChange={(e) =>
-                          setNovaOperacao({ ...novaOperacao, data: e.target.value })
-                        }
+                        className={formErrors.data ? "border-destructive" : ""}
+                        onChange={(e) => {
+                          setNovaOperacao({ ...novaOperacao, data: e.target.value });
+                          setFormErrors((prev) => ({ ...prev, data: undefined }));
+                        }}
                       />
+                      {formErrors.data && (
+                        <p className="text-xs text-destructive mt-1">{formErrors.data}</p>
+                      )}
                     </div>
 
                     <div className="flex items-end gap-2">
-                      <Button
-                        onClick={adicionarOperacao}
-                        className="flex-1"
-                        disabled={salvando}
-                      >
+                      <Button onClick={adicionarOperacao} className="flex-1" disabled={salvando}>
                         <Plus className="h-4 w-4 mr-2" />
                         {salvando ? "Salvando..." : "Adicionar"}
                       </Button>
                       <Button
                         variant="outline"
-                        onClick={() => setMostrarFormulario(false)}
+                        onClick={() => {
+                          setMostrarFormulario(false);
+                          setFormErrors({});
+                        }}
                       >
                         Cancelar
                       </Button>
@@ -544,67 +621,88 @@ export default function CalculadoraPage() {
             ) : operacoes.length > 0 ? (
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span>Operações Registradas</span>
-                    <span className="text-sm font-normal text-muted-foreground">
-                      {operacoes.length} operações
-                    </span>
-                  </CardTitle>
+                  <div className="flex items-center justify-between gap-4 flex-wrap">
+                    <CardTitle className="flex items-center gap-2">
+                      <span>Operações Registradas</span>
+                      <span className="text-sm font-normal text-muted-foreground">
+                        ({operacoesFiltradas.length}{busca ? ` de ${operacoes.length}` : ""})
+                      </span>
+                    </CardTitle>
+                    {/* Busca */}
+                    <div className="relative w-full sm:w-56">
+                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Filtrar por cripto, tipo..."
+                        value={busca}
+                        onChange={(e) => setBusca(e.target.value)}
+                        className="pl-8 h-8 text-sm"
+                      />
+                      {busca && (
+                        <button
+                          onClick={() => setBusca("")}
+                          className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {[...operacoes]
-                      .sort(
-                        (a, b) =>
-                          new Date(b.data).getTime() - new Date(a.data).getTime()
-                      )
-                      .map((op) => (
-                        <div
-                          key={op.id}
-                          className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                        >
-                          <div className="flex items-center gap-3">
-                            {op.tipo === "compra" ? (
-                              <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
-                                <TrendingUp className="h-5 w-5 text-green-600" />
+                  {operacoesFiltradas.length === 0 ? (
+                    <p className="text-center text-sm text-muted-foreground py-8">
+                      Nenhuma operação encontrada para &quot;{busca}&quot;
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      {[...operacoesFiltradas]
+                        .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
+                        .map((op) => (
+                          <div
+                            key={op.id}
+                            className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                          >
+                            <div className="flex items-center gap-3">
+                              {op.tipo === "compra" ? (
+                                <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                                  <TrendingUp className="h-5 w-5 text-green-600" />
+                                </div>
+                              ) : (
+                                <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                                  <TrendingDown className="h-5 w-5 text-red-600" />
+                                </div>
+                              )}
+                              <div>
+                                <p className="font-medium">
+                                  {op.tipo === "compra" ? "Compra" : "Venda"} de{" "}
+                                  {formatCrypto(op.quantidade)} {op.cripto}
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                  {new Date(op.data + "T12:00:00").toLocaleDateString("pt-BR")}
+                                  {op.exchange && ` • ${op.exchange}`}
+                                </p>
                               </div>
-                            ) : (
-                              <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
-                                <TrendingDown className="h-5 w-5 text-red-600" />
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <div className="text-right">
+                                <p className="font-semibold">{formatCurrency(op.valorTotal)}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {formatCurrency(op.precoUnitario)}/unid
+                                </p>
                               </div>
-                            )}
-                            <div>
-                              <p className="font-medium">
-                                {op.tipo === "compra" ? "Compra" : "Venda"} de{" "}
-                                {formatCrypto(op.quantidade)} {op.cripto}
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                {new Date(op.data + "T12:00:00").toLocaleDateString("pt-BR")}
-                                {op.exchange && ` • ${op.exchange}`}
-                              </p>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => removerOperacao(op.id)}
+                                className="text-muted-foreground hover:text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
                             </div>
                           </div>
-                          <div className="flex items-center gap-4">
-                            <div className="text-right">
-                              <p className="font-semibold">
-                                {formatCurrency(op.valorTotal)}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {formatCurrency(op.precoUnitario)}/unid
-                              </p>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => removerOperacao(op.id)}
-                              className="text-muted-foreground hover:text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                  </div>
+                        ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ) : null}
@@ -612,7 +710,6 @@ export default function CalculadoraPage() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Resumo do Mês */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -623,47 +720,30 @@ export default function CalculadoraPage() {
               <CardContent className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Total de Vendas</span>
-                  <span className="font-semibold">
-                    {formatCurrency(resumoMesAtual.totalVendas)}
-                  </span>
+                  <span className="font-semibold">{formatCurrency(resumoMesAtual.totalVendas)}</span>
                 </div>
-
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Limite de Isenção</span>
-                  <span className="font-semibold">
-                    {formatCurrency(LIMITE_ISENCAO_MENSAL)}
-                  </span>
+                  <span className="font-semibold">{formatCurrency(LIMITE_ISENCAO_MENSAL)}</span>
                 </div>
-
                 <div className="w-full bg-muted rounded-full h-2">
                   <div
                     className={`h-2 rounded-full transition-all ${
-                      resumoMesAtual.totalVendas > LIMITE_ISENCAO_MENSAL
-                        ? "bg-destructive"
-                        : "bg-primary"
+                      resumoMesAtual.totalVendas > LIMITE_ISENCAO_MENSAL ? "bg-destructive" : "bg-primary"
                     }`}
                     style={{
-                      width: `${Math.min(
-                        100,
-                        (resumoMesAtual.totalVendas / LIMITE_ISENCAO_MENSAL) * 100
-                      )}%`,
+                      width: `${Math.min(100, (resumoMesAtual.totalVendas / LIMITE_ISENCAO_MENSAL) * 100)}%`,
                     }}
                   />
                 </div>
-
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Lucro/Prejuízo</span>
-                  <span
-                    className={`font-semibold ${
-                      resumoMesAtual.lucroTotal >= 0
-                        ? "text-green-600"
-                        : "text-destructive"
-                    }`}
-                  >
+                  <span className={`font-semibold ${
+                    resumoMesAtual.lucroTotal >= 0 ? "text-green-600" : "text-destructive"
+                  }`}>
                     {formatCurrency(resumoMesAtual.lucroTotal)}
                   </span>
                 </div>
-
                 <div className="border-t pt-4">
                   {resumoMesAtual.isento ? (
                     <div className="flex items-start gap-2 p-3 rounded-lg bg-green-50 text-green-800 dark:bg-green-950 dark:text-green-200">
@@ -678,12 +758,8 @@ export default function CalculadoraPage() {
                       <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
                       <div>
                         <p className="font-medium">Imposto Devido</p>
-                        <p className="text-2xl font-bold">
-                          {formatCurrency(resumoMesAtual.impostoDevido)}
-                        </p>
-                        <p className="text-sm">
-                          Vencimento: último dia útil do mês seguinte
-                        </p>
+                        <p className="text-2xl font-bold">{formatCurrency(resumoMesAtual.impostoDevido)}</p>
+                        <p className="text-sm">Vencimento: último dia útil do mês seguinte</p>
                       </div>
                     </div>
                   )}
@@ -691,15 +767,12 @@ export default function CalculadoraPage() {
               </CardContent>
             </Card>
 
-            {/* DARF */}
             {resumosMensais.some((r) => r.impostoDevido > 0) && (
               <DarfModal resumosMensais={resumosMensais} />
             )}
 
-            {/* Portfolio */}
             <PortfolioCard portfolio={resumoGeral.portfolio} />
 
-            {/* Regras do IR */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Regras do IR</CardTitle>
@@ -722,10 +795,7 @@ export default function CalculadoraPage() {
                   <p className="font-medium text-foreground">Vencimento</p>
                   <p>Último dia útil do mês seguinte à venda</p>
                 </div>
-                <Link
-                  href="/legislacao"
-                  className="text-primary text-sm hover:underline block text-center"
-                >
+                <Link href="/legislacao" className="text-primary text-sm hover:underline block text-center">
                   Ver legislação completa →
                 </Link>
               </CardContent>

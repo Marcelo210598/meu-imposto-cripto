@@ -18,9 +18,10 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts  Account[]
-  sessions  Session[]
-  operacoes Operacao[]
+  accounts      Account[]
+  sessions      Session[]
+  operacoes     Operacao[]
+  resetTokens   PasswordResetToken[]
 }
 
 model Account {
@@ -75,4 +76,31 @@ model Operacao {
 
   @@index([userId])
   @@index([userId, data])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?  // null = ação anônima (ex: tentativa de registro com email já em uso)
+  action    String   // login | register | operacao_delete | export_csv | export_pdf | login_failed
+  ip        String?
+  metadata  Json?    // dados extras (ex: cripto deletada, quantidade, etc.)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([action])
 }

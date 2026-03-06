@@ -94,82 +94,72 @@ export function calcularImposto(ganho: number): number {
 }
 
 /**
- * Agrupa operações por mês e calcula resumo mensal
+ * Agrupa operações por mês e calcula resumo mensal.
+ * Complexidade: O(n log n) — portfolio incremental, sem recálculo por mês.
  */
 export function calcularResumosMensais(operacoes: Operacao[]): ResumoMensal[] {
-  const meses: Map<string, Operacao[]> = new Map();
+  if (operacoes.length === 0) return [];
 
-  // Agrupar por mês
+  // Agrupar por mês mantendo ordem de inserção
+  const mesesMap = new Map<string, Operacao[]>();
   for (const op of operacoes) {
-    const mes = op.data.substring(0, 7); // "2024-01"
-    const ops = meses.get(mes) || [];
-    ops.push(op);
-    meses.set(mes, ops);
+    const mes = op.data.substring(0, 7);
+    const lista = mesesMap.get(mes);
+    if (lista) lista.push(op);
+    else mesesMap.set(mes, [op]);
   }
 
-  // Calcular resumo de cada mês
+  const mesesOrdenados = Array.from(mesesMap.keys()).sort();
+
+  // Portfolio incremental — atualizado mês a mês sem reprocessar histórico
+  const portfolioMap = new Map<string, PortfolioCripto>();
+
   const resumos: ResumoMensal[] = [];
 
-  // Precisamos calcular o portfolio progressivamente
-  const todasOperacoesOrdenadas = [...operacoes].sort(
-    (a, b) => new Date(a.data).getTime() - new Date(b.data).getTime()
-  );
-
-  const mesesOrdenados = Array.from(meses.keys()).sort();
-
   for (const mes of mesesOrdenados) {
-    const opsMes = meses.get(mes) || [];
+    const opsMes = mesesMap.get(mes)!;
+    const compras = opsMes.filter((op) => op.tipo === "compra");
+    const vendas  = opsMes.filter((op) => op.tipo === "venda");
 
-    // Calcular portfolio até o início deste mês
-    const opsAteEsseMes = todasOperacoesOrdenadas.filter(
-      (op) => op.data.substring(0, 7) <= mes
-    );
-    const portfolioMap = new Map<string, PortfolioCripto>();
-
-    // Recalcular portfolio progressivamente
-    for (const op of opsAteEsseMes) {
-      if (op.data.substring(0, 7) === mes && op.tipo === "venda") continue; // Não incluir vendas do mês atual no cálculo do custo
-
-      const atual = portfolioMap.get(op.cripto) || {
-        cripto: op.cripto,
-        quantidade: 0,
-        precoMedio: 0,
-        custoTotal: 0,
+    // 1. Aplica compras do mês ao portfolio (afeta custo médio das vendas do mesmo mês)
+    for (const op of compras) {
+      const atual = portfolioMap.get(op.cripto) ?? {
+        cripto: op.cripto, quantidade: 0, precoMedio: 0, custoTotal: 0,
       };
-
-      if (op.tipo === "compra") {
-        const novaQuantidade = atual.quantidade + op.quantidade;
-        const novoCustoTotal = atual.custoTotal + op.valorTotal;
-        portfolioMap.set(op.cripto, {
-          ...atual,
-          quantidade: novaQuantidade,
-          precoMedio: novaQuantidade > 0 ? novoCustoTotal / novaQuantidade : 0,
-          custoTotal: novoCustoTotal,
-        });
-      }
+      const novaQtd   = atual.quantidade + op.quantidade;
+      const novoCusto = atual.custoTotal + op.valorTotal;
+      portfolioMap.set(op.cripto, {
+        cripto:      op.cripto,
+        quantidade:  novaQtd,
+        precoMedio:  novaQtd > 0 ? novoCusto / novaQtd : 0,
+        custoTotal:  novoCusto,
+      });
     }
 
-    const vendas = opsMes.filter((op) => op.tipo === "venda");
-    const compras = opsMes.filter((op) => op.tipo === "compra");
-
-    const totalVendas = vendas.reduce((acc, op) => acc + op.valorTotal, 0);
+    // 2. Calcula lucro das vendas com o portfolio atual
+    const totalVendas  = vendas.reduce((acc, op) => acc + op.valorTotal, 0);
     const totalCompras = compras.reduce((acc, op) => acc + op.valorTotal, 0);
-
-    // Calcular lucro real das vendas
     let lucroTotal = 0;
     for (const venda of vendas) {
       lucroTotal += calcularLucroVenda(venda, portfolioMap);
     }
 
-    const isento = totalVendas <= LIMITE_ISENCAO_MENSAL;
-    const impostoDevido = isento ? 0 : calcularImposto(Math.max(0, lucroTotal));
+    // 3. Aplica vendas ao portfolio (reduz quantidades para os próximos meses)
+    for (const op of vendas) {
+      const atual = portfolioMap.get(op.cripto);
+      if (!atual) continue;
+      const novaQtd   = Math.max(0, atual.quantidade - op.quantidade);
+      const novoCusto = Math.max(0, atual.custoTotal - op.quantidade * atual.precoMedio);
+      portfolioMap.set(op.cripto, { ...atual, quantidade: novaQtd, custoTotal: novoCusto });
+    }
 
+    const isento = totalVendas <= LIMITE_ISENCAO_MENSAL;
     resumos.push({
       mes,
       totalVendas,
       totalCompras,
       lucroTotal,
-      impostoDevido,
+      impostoDevido: isento ? 0 : calcularImposto(Math.max(0, lucroTotal)),
       isento,
       operacoes: opsMes,
     });
