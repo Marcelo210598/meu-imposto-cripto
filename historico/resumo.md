@@ -1,6 +1,6 @@
 # Meu Imposto Cripto - Resumo do Projeto
 
-> Última atualização: 04/03/2026 (Sprint 3)
+> Última atualização: 05/03/2026 (Sessão 3 — Stripe Live)
 
 ## 🎯 Objetivo
 
@@ -79,15 +79,24 @@ Calculadora de Imposto de Renda para operações com criptomoedas no Brasil, seg
 - [x] Sitemap atualizado com /relatorio
 - [x] Build limpo (19 rotas, 0 erros), deploy Vercel ✅ (commit c225382)
 
-### Sprint 4 🚧 (próximo — foco em SEGURANÇA)
-- [ ] Rate limiting nas rotas da API
-- [ ] Validação de inputs com Zod em todas as rotas
-- [ ] Security headers (CSP, X-Frame-Options, HSTS via next.config)
-- [ ] CSRF hardening
-- [ ] Session rotation + absolute timeout
-- [ ] Audit log para operações sensíveis
-- [ ] Sanitização de inputs do usuário
-- [ ] 2FA (opcional — se priorizar)
+### 05/03/2026 — Stripe Live ✅
+- [x] Integração Stripe Checkout (live mode)
+- [x] Webhook configurado (4 eventos, Ativo)
+- [x] Portal de assinatura (gerenciar/cancelar)
+- [x] Planos Pro (R$29/mês) e Contador (R$99/mês) em live mode
+- [x] Fix: env vars Stripe tinham \n literal (corrigido via echo -n)
+- [x] try/catch robusto em /api/stripe/checkout e /api/stripe/portal
+- [x] Password reset (email via Nodemailer/Gmail SMTP)
+- [x] 19 testes unitários (Jest + ts-jest)
+- [x] CSRF protection, rate limiting, validação Zod
+- PENDENTE: revisão Stripe (2-3 dias úteis para live mode completo)
+
+### Próxima sessão — Visual/Animações
+- [ ] Animações na landing page (Framer Motion ou CSS)
+- [ ] Elementos mais dinâmicos no hero
+- [ ] Micro-interações nos cards de stats
+- [ ] Transições suaves entre seções
+- [ ] Floating elements / partículas no fundo (crypto theme)
 
 ## 💰 Regras de IR (Brasil)
 
@@ -169,6 +178,8 @@ NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 | 04/03/2026 (sprint1) | Sprint 1: auth, Neon DB, API operacoes, legislação, CSV fixes |
 | 04/03/2026 (sprint2) | Sprint 2: deploy Vercel, persistência, upload CSV multi-exchange |
 | 04/03/2026 (sprint3) | Sprint 3: PTAX BCB, conversão USD→BRL, Relatório IRPF completo, GCAP |
+| 05/03/2026 (sessão 1-2) | Sprint segurança: CSRF, rate limit, Zod, testes Jest, password reset, Nodemailer |
+| 05/03/2026 (sessão 3) | Stripe live: checkout funcionando, webhook ativo, fix env vars com \n |
 
 ---
 
