@@ -15,6 +15,7 @@ import {
   Calendar,
   Loader2,
   ShieldCheck,
+  CreditCard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,6 +30,7 @@ export default function PerfilPage() {
   const router = useRouter();
   const [operacoes, setOperacoes] = useState<Operacao[]>([]);
   const [loading, setLoading] = useState(true);
+  const [portalLoading, setPortalLoading] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -45,6 +47,22 @@ export default function PerfilPage() {
         .finally(() => setLoading(false));
     }
   }, [status]);
+
+  const planoAtual = (session?.user as { plano?: string })?.plano ?? "gratis";
+  const isPago = planoAtual === "pro" || planoAtual === "contador";
+
+  const handlePortal = async () => {
+    setPortalLoading(true);
+    try {
+      const res = await fetch("/api/stripe/portal", { method: "POST" });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } catch {
+      /* silencioso */
+    } finally {
+      setPortalLoading(false);
+    }
+  };
 
   if (status === "loading" || status === "unauthenticated") {
     return (
@@ -122,10 +140,36 @@ export default function PerfilPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <ShieldCheck className="h-4 w-4 text-green-500" />
-                <span>Plano Gratuito</span>
+                <span>Plano {planoAtual.charAt(0).toUpperCase() + planoAtual.slice(1)}</span>
               </div>
-              <Badge variant="secondary">Grátis</Badge>
+              <Badge variant={isPago ? "default" : "secondary"}>
+                {planoAtual.charAt(0).toUpperCase() + planoAtual.slice(1)}
+              </Badge>
             </div>
+
+            {isPago ? (
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={handlePortal}
+                disabled={portalLoading}
+              >
+                {portalLoading ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <CreditCard className="h-4 w-4 mr-2" />
+                )}
+                Gerenciar Assinatura
+              </Button>
+            ) : (
+              <Button variant="default" size="sm" className="w-full" asChild>
+                <Link href="/precos">
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  Fazer Upgrade
+                </Link>
+              </Button>
+            )}
 
             {primeiraOp && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
