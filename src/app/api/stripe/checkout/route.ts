@@ -32,6 +32,11 @@ export async function POST(req: NextRequest) {
   const planoKey = parsed.data.plano as PlanoKey;
   const plan = STRIPE_PLANS[planoKey];
 
+  if (!plan.priceId) {
+    console.error(`[stripe/checkout] STRIPE_PRICE_${planoKey.toUpperCase()} não configurado`);
+    return NextResponse.json({ error: "Plano não disponível no momento" }, { status: 503 });
+  }
+
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
     select: { stripeCustomerId: true, email: true, name: true },
@@ -39,26 +44,33 @@ export async function POST(req: NextRequest) {
 
   const baseUrl = process.env.NEXTAUTH_URL ?? "https://workspace-tau-olive.vercel.app";
 
-  const checkoutSession = await stripe.checkout.sessions.create({
-    mode: "subscription",
-    payment_method_types: ["card"],
-    customer: user?.stripeCustomerId ?? undefined,
-    customer_email: user?.stripeCustomerId ? undefined : (user?.email ?? session.user.email),
-    line_items: [{ price: plan.priceId, quantity: 1 }],
-    success_url: `${baseUrl}/perfil?success=1&plano=${planoKey}`,
-    cancel_url: `${baseUrl}/precos?canceled=1`,
-    metadata: {
-      userId: session.user.id,
-      plano: planoKey,
-    },
-    subscription_data: {
+  let checkoutSession;
+  try {
+    checkoutSession = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      payment_method_types: ["card"],
+      customer: user?.stripeCustomerId ?? undefined,
+      customer_email: user?.stripeCustomerId ? undefined : (user?.email ?? session.user.email),
+      line_items: [{ price: plan.priceId, quantity: 1 }],
+      success_url: `${baseUrl}/perfil?success=1&plano=${planoKey}`,
+      cancel_url: `${baseUrl}/precos?canceled=1`,
       metadata: {
         userId: session.user.id,
         plano: planoKey,
       },
-    },
-    locale: "pt-BR",
-  });
+      subscription_data: {
+        metadata: {
+          userId: session.user.id,
+          plano: planoKey,
+        },
+      },
+      locale: "pt-BR",
+    });
+  } catch (err) {
+    console.error("[stripe/checkout] Erro ao criar sessão:", err);
+    const message = err instanceof Error ? err.message : "Erro desconhecido";
+    return NextResponse.json({ error: `Erro no checkout: ${message}` }, { status: 500 });
+  }
 
   return NextResponse.json({ url: checkoutSession.url });
 }

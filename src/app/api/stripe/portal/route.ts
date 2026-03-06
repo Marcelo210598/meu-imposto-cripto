@@ -23,10 +23,17 @@ export async function POST(req: NextRequest) {
 
   const baseUrl = process.env.NEXTAUTH_URL ?? "https://workspace-tau-olive.vercel.app";
 
-  const portalSession = await stripe.billingPortal.sessions.create({
-    customer: user.stripeCustomerId,
-    return_url: `${baseUrl}/perfil`,
-  });
+  let portalSession;
+  try {
+    portalSession = await stripe.billingPortal.sessions.create({
+      customer: user.stripeCustomerId,
+      return_url: `${baseUrl}/perfil`,
+    });
+  } catch (err) {
+    console.error("[stripe/portal] Erro ao criar sessão:", err);
+    const message = err instanceof Error ? err.message : "Erro desconhecido";
+    return NextResponse.json({ error: `Erro no portal: ${message}` }, { status: 500 });
+  }
 
   return NextResponse.json({ url: portalSession.url });
 }
