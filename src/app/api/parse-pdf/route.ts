@@ -2,11 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { rateLimit, getIp } from "@/lib/rate-limit";
 import { parseBinancePDF } from "@/lib/pdf-parser";
 
-// Tamanho máximo: 10 MB
 const MAX_SIZE = 10 * 1024 * 1024;
 
 export async function POST(req: NextRequest) {
-  // Rate limit: 10 uploads por minuto por IP
   const ip = getIp(req);
   const allowed = rateLimit(`parse-pdf:${ip}`, 10, 60_000);
   if (!allowed) {
@@ -36,11 +34,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const buffer = Buffer.from(await file.arrayBuffer());
-
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const pdfParse = require("pdf-parse");
-    const data = await pdfParse(buffer);
-    const text: string = data.text ?? "";
+    const text = await extractTextFromPDF(buffer);
 
     if (!text.trim()) {
       return NextResponse.json(
@@ -56,8 +50,7 @@ export async function POST(req: NextRequest) {
         {
           error:
             "Nenhuma operação encontrada no PDF. " +
-            'Certifique-se de exportar "Spot - Histórico de Trades" (não Transaction History) ' +
-            "no formato PDF pela Central de Download de Dados da Binance.",
+            'Certifique-se de exportar "Spot - Histórico de Trades" pela Central de Download de Dados da Binance.',
         },
         { status: 422 }
       );
@@ -71,4 +64,44 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+// ─── extração de texto via pdfjs-dist (JS puro, sem deps nativas) ────────────
+
+async function extractTextFromPDF(buffer: Buffer): Promise<string> {
+  // pdfjs-dist é JS puro — funciona em qualquer ambiente serverless
+  const pdfjsLib = await import("pdfjs-dist");
+
+  // Sem worker no Node.js / Vercel
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "";
+
+  const loadingTask = pdfjsLib.getDocument({
+    data: new Uint8Array(buffer),
+    useSystemFonts: true,
+    // @ts-expect-error — opção válida mas não tipada em todas as versões
+    disableWorker: true,
+  });
+
+  const pdf = await loadingTask.promise;
+  let fullText = "";
+
+  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+    const page = await pdf.getPage(pageNum);
+    const content = await page.getTextContent();
+
+    // Cada item é uma palavra/token — juntamos com espaço para reconstruir linhas
+    // hasEOL indica fim de linha → substituímos por \n para o parser linha a linha
+    let pageText = "";
+    for (const item of content.items) {
+      if ("str" in item) {
+        pageText += item.str;
+        if (item.hasEOL) pageText += "\n";
+        else pageText += " ";
+      }
+    }
+
+    fullText += pageText + "\n";
+  }
+
+  return fullText;
 }
