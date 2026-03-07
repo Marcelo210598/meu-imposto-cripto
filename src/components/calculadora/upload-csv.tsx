@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import {
   Upload, FileText, AlertCircle, CheckCircle2,
-  ChevronDown, ChevronUp, RefreshCw, DollarSign, X,
+  ChevronDown, ChevronUp, RefreshCw, DollarSign, X, FileUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,8 +18,8 @@ interface UploadCSVProps {
 const EXCHANGES = [
   {
     nome: "Binance",
-    instrucoes: "Carteira → Histórico de Negociações → Exportar → CSV",
-    aviso: 'Use "Trade History" (não Transaction History) — precisa do valor em BRL/USDT',
+    instrucoes: 'Perfil → Central de Download de Dados → Spot - Histórico de Trades → PDF ou Excel → Gerar',
+    aviso: 'Aceita PDF e Excel (.xlsx). Use "Spot - Histórico de Trades" (não Transaction History).',
     tipo: "br" as const,
   },
   {
@@ -143,12 +143,65 @@ export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
     setStatus("idle");
   };
 
+  const handlePDF = useCallback(
+    async (file: File) => {
+      setStatus("idle");
+      setMessage("");
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const res = await fetch("/api/parse-pdf", { method: "POST", body: formData });
+        const json = await res.json();
+
+        if (!res.ok) {
+          setStatus("error");
+          setMessage(json.error ?? "Erro ao processar o PDF.");
+          return;
+        }
+
+        const operacoes: Operacao[] = json.operacoes ?? [];
+
+        if (operacoes.length === 0) {
+          setStatus("error");
+          setMessage("Nenhuma operação encontrada no PDF.");
+          return;
+        }
+
+        const temInternacional = operacoes.some(isInternacional);
+        if (temInternacional) {
+          setPendingOps(operacoes);
+          setCotacoes({});
+          setPtaxCarregado(false);
+          return;
+        }
+
+        onImport(operacoes);
+        setStatus("success");
+        setMessage(`${operacoes.length} operações importadas com sucesso!`);
+        setTimeout(() => { setStatus("idle"); setMessage(""); }, 3000);
+      } catch {
+        setStatus("error");
+        setMessage("Erro de rede ao processar o PDF. Tente novamente.");
+      }
+    },
+    [onImport]
+  );
+
   const handleFile = useCallback(
     async (file: File) => {
       if (disabled) return;
-      if (!file.name.endsWith(".csv")) {
+
+      const name = file.name.toLowerCase();
+
+      if (name.endsWith(".pdf")) {
+        return handlePDF(file);
+      }
+
+      if (!name.endsWith(".csv")) {
         setStatus("error");
-        setMessage("Por favor, selecione um arquivo CSV");
+        setMessage("Formato não suportado. Selecione um arquivo CSV ou PDF.");
         return;
       }
 
@@ -164,7 +217,6 @@ export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
 
         const temInternacional = operacoes.some(isInternacional);
         if (temInternacional) {
-          // Mostra etapa de conversão PTAX
           setPendingOps(operacoes);
           setCotacoes({});
           setPtaxCarregado(false);
@@ -180,7 +232,7 @@ export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
           setStatus("error");
           setMessage(
             'Arquivo "Transaction History" da Binance não é suportado — ele não contém o valor em BRL. ' +
-            'Exporte o "Trade History" (Histórico de Negociações → Spot → Exportar) para obter os valores corretos.'
+            'Exporte "Spot - Histórico de Trades" pelo menu Central de Download de Dados.'
           );
         } else {
           setStatus("error");
@@ -189,7 +241,7 @@ export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
         }
       }
     },
-    [onImport, disabled]
+    [onImport, disabled, handlePDF]
   );
 
   const handleDrop = useCallback(
@@ -227,7 +279,7 @@ export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Upload className="h-5 w-5" />
-          Importar Operações via CSV
+          Importar Operações (CSV ou PDF)
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -244,17 +296,17 @@ export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
         >
           {status === "idle" && (
             <>
-              <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-4" />
+              <FileUp className="h-10 w-10 mx-auto text-muted-foreground mb-4" />
               <p className="text-sm text-muted-foreground mb-2">
-                Arraste um arquivo CSV ou clique para selecionar
+                Arraste um arquivo CSV ou PDF, ou clique para selecionar
               </p>
               <p className="text-xs text-muted-foreground mb-4">
-                9 exchanges suportadas — detecção automática de formato
+                Binance PDF suportado · 9 exchanges via CSV · detecção automática
               </p>
               <label>
                 <input
                   type="file"
-                  accept=".csv"
+                  accept=".csv,.pdf"
                   className="hidden"
                   onChange={handleInputChange}
                   disabled={disabled}
@@ -283,7 +335,7 @@ export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
               <label>
                 <input
                   type="file"
-                  accept=".csv"
+                  accept=".csv,.pdf"
                   className="hidden"
                   onChange={handleInputChange}
                 />
@@ -389,7 +441,7 @@ export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
           className="w-full flex items-center justify-between text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           onClick={() => setMostrarInstrucoes(!mostrarInstrucoes)}
         >
-          <span>Como exportar o CSV da sua exchange?</span>
+          <span>Como exportar o arquivo da sua exchange?</span>
           {mostrarInstrucoes ? (
             <ChevronUp className="h-4 w-4" />
           ) : (
