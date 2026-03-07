@@ -148,24 +148,37 @@ export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
       setStatus("idle");
       setMessage("");
 
-      const formData = new FormData();
-      formData.append("file", file);
-
       try {
-        const res = await fetch("/api/parse-pdf", { method: "POST", body: formData });
-        const json = await res.json();
+        // pdfjs-dist roda no browser — sem dependências nativas
+        const pdfjsLib = await import("pdfjs-dist");
+        // Worker estático servido pelo próprio domínio (CSP-safe)
+        pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
-        if (!res.ok) {
-          setStatus("error");
-          setMessage(json.error ?? "Erro ao processar o PDF.");
-          return;
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+
+        let text = "";
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          let pageText = "";
+          for (const item of content.items) {
+            if ("str" in item) {
+              pageText += item.str;
+              pageText += item.hasEOL ? "\n" : " ";
+            }
+          }
+          text += pageText + "\n";
         }
 
-        const operacoes: Operacao[] = json.operacoes ?? [];
+        const { parseBinancePDF } = await import("@/lib/pdf-parser");
+        const operacoes = parseBinancePDF(text);
 
         if (operacoes.length === 0) {
           setStatus("error");
-          setMessage("Nenhuma operação encontrada no PDF.");
+          setMessage(
+            'Nenhuma operação encontrada. Exporte "Spot - Histórico de Trades" pela Central de Download de Dados da Binance.'
+          );
           return;
         }
 
@@ -181,9 +194,10 @@ export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
         setStatus("success");
         setMessage(`${operacoes.length} operações importadas com sucesso!`);
         setTimeout(() => { setStatus("idle"); setMessage(""); }, 3000);
-      } catch {
+      } catch (err) {
+        console.error("PDF error:", err);
         setStatus("error");
-        setMessage("Erro de rede ao processar o PDF. Tente novamente.");
+        setMessage("Erro ao processar o PDF. Verifique se o arquivo é válido.");
       }
     },
     [onImport]

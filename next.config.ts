@@ -52,7 +52,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["pdfjs-dist"],
+
   async headers() {
     return [
       {
