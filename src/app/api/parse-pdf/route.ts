@@ -69,8 +69,8 @@ export async function POST(req: NextRequest) {
 // ─── extração de texto via pdfjs-dist (JS puro, sem deps nativas) ────────────
 
 async function extractTextFromPDF(buffer: Buffer): Promise<string> {
-  // pdfjs-dist é JS puro — funciona em qualquer ambiente serverless
-  const pdfjsLib = await import("pdfjs-dist");
+  // Legacy build (.mjs) — inclui polyfills para DOMMatrix etc. (necessário no Node.js/Vercel)
+  const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
 
   // Sem worker no Node.js / Vercel
   pdfjsLib.GlobalWorkerOptions.workerSrc = "";
@@ -78,8 +78,6 @@ async function extractTextFromPDF(buffer: Buffer): Promise<string> {
   const loadingTask = pdfjsLib.getDocument({
     data: new Uint8Array(buffer),
     useSystemFonts: true,
-    // @ts-expect-error — opção válida mas não tipada em todas as versões
-    disableWorker: true,
   });
 
   const pdf = await loadingTask.promise;
