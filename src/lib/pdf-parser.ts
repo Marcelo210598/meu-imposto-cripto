@@ -1,42 +1,41 @@
 import { Operacao } from "./types";
 
-// ─────────────────────────────────────────────────────────────
-// Parser de PDF — Binance Spot Trade History
+// ─────────────────────────────────────────────────────────────────────────────
+// Parser de PDF — Binance Spot Trade History (PT-BR)
 //
-// Formato exportado pela Binance (PDF):
-//   Date(UTC)  Pair  Side  Price  Executed  Amount  Fee
-//   2024-01-15 08:23:45  BTCBRL  BUY  285000.00  0.0010 BTC  285.00 BRL  0.001 USDT
-// ─────────────────────────────────────────────────────────────
+// Formato real exportado pela Binance:
+//   Tempo   Par   Lado   Preço   Executado   Quantidade   Taxa
+//   26-03-02 21:11:06   ETHBRL   SELL   10502.13   0.1705ETH   1790.613165BRL   1.79BRL
+//
+// Observações:
+//   - Data com 2 dígitos de ano: "26-03-02" → "2026-03-02"
+//   - Números colados com a unidade: "0.1705ETH", "1790.613165BRL"
+//   - Separador de colunas: múltiplos espaços
+//   - Lado (Side): BUY / SELL (inglês, mesmo no export PT-BR)
+// ─────────────────────────────────────────────────────────────────────────────
 
 const EXCHANGES_USD = ["USDT", "USD", "USDC", "BUSD"];
 
-/**
- * Faz o parse do texto extraído de um PDF Binance Spot Trade History.
- * Retorna lista de Operacao[] com exchange "Binance" ou "Binance (USDT)"
- * dependendo da moeda do par.
- */
+// Regex: captura cada linha de trade
+// Grupos:
+//   1 — data     (YY-MM-DD)
+//   2 — par      (ex: ETHBRL, ETHUSDT)
+//   3 — lado     (BUY | SELL)
+//   4 — preço
+//   5 — executado (qty sem unidade)
+//   6 — quantidade/total (valor na moeda cotada, sem unidade)
+const ROW_PATTERN =
+  /^(\d{2}-\d{2}-\d{2})\s+\d{2}:\d{2}:\d{2}\s+([A-Z0-9]{4,12})\s+(BUY|SELL)\s+([\d.]+)\s+([\d.]+)[A-Z]+\s+([\d.]+)[A-Z]+/i;
+
 export function parseBinancePDF(text: string): Operacao[] {
   const operacoes: Operacao[] = [];
   const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
-
-  // Regex principal: captura cada linha que começa com data + hora + par + side
-  // Aceita espaçamento variável — PDFs podem omitir espaços entre células
-  //
-  // Grupos:
-  //   1 — data (YYYY-MM-DD)
-  //   2 — par  (ex: BTCBRL, ETHUSDT)
-  //   3 — side (BUY | SELL)
-  //   4 — price
-  //   5 — executed qty
-  //   6 — amount (total na moeda cotada)
-  const ROW_PATTERN =
-    /(\d{4}-\d{2}-\d{2})\s+\d{2}:\d{2}:\d{2}\s+([A-Z0-9]{4,12})\s+(BUY|SELL)\s+([\d,]+\.?\d*)\s+([\d,]+\.?\d*)\s*[A-Z]*\s*([\d,]+\.?\d*)/i;
 
   for (const line of lines) {
     const match = line.match(ROW_PATTERN);
     if (!match) continue;
 
-    const [, date, pair, side, priceRaw, executedRaw, amountRaw] = match;
+    const [, dateYY, pair, side, priceRaw, executedRaw, amountRaw] = match;
 
     try {
       const tipo: "compra" | "venda" = side.toUpperCase() === "BUY" ? "compra" : "venda";
@@ -44,9 +43,9 @@ export function parseBinancePDF(text: string): Operacao[] {
       const moedaCotada = extrairMoedaCotada(pair);
       const isUSD = EXCHANGES_USD.includes(moedaCotada);
 
-      const quantidade = parseNum(executedRaw);
-      const valorTotal = parseNum(amountRaw);
-      const precoUnitario = parseNum(priceRaw);
+      const quantidade = parseFloat(executedRaw) || 0;
+      const valorTotal = parseFloat(amountRaw) || 0;
+      const precoUnitario = parseFloat(priceRaw) || 0;
 
       if (quantidade <= 0 || valorTotal <= 0) continue;
 
@@ -57,7 +56,7 @@ export function parseBinancePDF(text: string): Operacao[] {
         quantidade,
         valorTotal,
         precoUnitario,
-        data: date,
+        data: expandirAno(dateYY),
         exchange: isUSD ? "Binance (USDT)" : "Binance",
       });
     } catch (e) {
@@ -68,11 +67,13 @@ export function parseBinancePDF(text: string): Operacao[] {
   return operacoes;
 }
 
-// ─── helpers ──────────────────────────────────────────────────
+// ─── helpers ──────────────────────────────────────────────────────────────────
 
-function parseNum(raw: string): number {
-  // Remove separadores de milhar (vírgula) e converte
-  return parseFloat(raw.replace(/,/g, "")) || 0;
+/** "26-03-02" → "2026-03-02" */
+function expandirAno(dateYY: string): string {
+  const [yy, mm, dd] = dateYY.split("-");
+  const year = 2000 + parseInt(yy, 10);
+  return `${year}-${mm}-${dd}`;
 }
 
 const MOEDAS_COTADAS = ["BRL", "USDT", "USDC", "BUSD", "USD", "EUR", "BTC", "ETH", "BNB"];
