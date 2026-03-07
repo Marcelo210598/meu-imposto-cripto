@@ -8,8 +8,8 @@ const MAX_SIZE = 10 * 1024 * 1024;
 export async function POST(req: NextRequest) {
   // Rate limit: 10 uploads por minuto por IP
   const ip = getIp(req);
-  const limited = rateLimit(`parse-pdf:${ip}`, 10, 60_000);
-  if (limited) {
+  const allowed = rateLimit(`parse-pdf:${ip}`, 10, 60_000);
+  if (!allowed) {
     return NextResponse.json({ error: "Muitas requisições. Aguarde um momento." }, { status: 429 });
   }
 
