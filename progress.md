@@ -1,6 +1,6 @@
 # Meu Imposto Cripto - Progresso
 
-## Última atualização: 05/03/2026 — Sprint 5 concluído ✅ (Nota 10)
+## Última atualização: 06/03/2026 — Suporte a PDF da Binance ✅
 
 ## 📌 Visão Geral
 
@@ -154,9 +154,17 @@
   - Rate limit: 3 tentativas/15min por IP (anti-enumeração)
 - [x] Todas páginas no login agora têm link "Esqueci minha senha"
 
+### Importação de PDF — Binance (06/03/2026)
+- [x] Suporte a upload de PDF da Binance (Spot - Histórico de Trades)
+- [x] Parse client-side com pdfjs-dist (browser — sem deps nativas)
+- [x] Worker servido de `/public/pdf.worker.min.mjs` (CSP-safe)
+- [x] Parser ajustado para formato real: data YY-MM-DD, números colados com unidade (0.1705ETH)
+- [x] Pares USDT/USDC do PDF → conversão PTAX automática (mesmo fluxo do CSV)
+- [x] Testado com PDF real da Binance PT-BR ✅
+
 ## 🚧 Em progresso
 
-*Sprint 5 concluído — somente Stripe (pagamentos) pendente*
+*Próxima etapa: melhorias estéticas do app*
 
 ## ⚠️ Problemas conhecidos / Bugs
 
