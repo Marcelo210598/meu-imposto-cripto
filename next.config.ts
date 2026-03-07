@@ -52,6 +52,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ["pdf-parse"],
   async headers() {
     return [
       {
