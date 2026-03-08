@@ -442,13 +442,16 @@ export default function ExchangesPage() {
 
       {/* Modal — conectar exchange */}
       <Dialog open={modalAberto} onOpenChange={setModalAberto}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
+        <DialogContent className="max-w-md max-h-[90vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle>Conectar {exchangeAtual.nome}</DialogTitle>
             <DialogDescription>
               Cole sua API Key e Secret Key abaixo. Usamos apenas permissão de leitura.
             </DialogDescription>
           </DialogHeader>
+
+          {/* Área scrollável */}
+          <div className="overflow-y-auto flex-1 space-y-4 pr-1">
 
           {/* Aviso mobile */}
           {exchangeAtual.avisoMobile && (
@@ -540,7 +543,9 @@ export default function ExchangesPage() {
             </div>
           </div>
 
-          <DialogFooter>
+          </div>{/* fim área scrollável */}
+
+          <DialogFooter className="flex-shrink-0 pt-2 border-t">
             <Button variant="outline" onClick={() => setModalAberto(false)} disabled={conectando}>
               Cancelar
             </Button>
