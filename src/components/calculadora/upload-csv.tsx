@@ -203,6 +203,55 @@ export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
     [onImport]
   );
 
+  const handleXLSX = useCallback(
+    async (file: File) => {
+      setStatus("idle");
+      setMessage("");
+      try {
+        const XLSX = await import("xlsx");
+        const arrayBuffer = await file.arrayBuffer();
+        const wb = XLSX.read(arrayBuffer, { type: "array", cellDates: false });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: "" });
+
+        if (rows.length === 0) {
+          setStatus("error");
+          setMessage("Planilha vazia ou formato inválido.");
+          return;
+        }
+
+        const { parseBinanceXLSX } = await import("@/lib/pdf-parser");
+        const operacoes = parseBinanceXLSX(rows);
+
+        if (operacoes.length === 0) {
+          setStatus("error");
+          setMessage(
+            'Nenhuma operação encontrada. Exporte "Spot - Histórico de Trades" pela Central de Download de Dados da Binance.'
+          );
+          return;
+        }
+
+        const temInternacional = operacoes.some(isInternacional);
+        if (temInternacional) {
+          setPendingOps(operacoes);
+          setCotacoes({});
+          setPtaxCarregado(false);
+          return;
+        }
+
+        onImport(operacoes);
+        setStatus("success");
+        setMessage(`${operacoes.length} operações importadas com sucesso!`);
+        setTimeout(() => { setStatus("idle"); setMessage(""); }, 3000);
+      } catch (err) {
+        console.error("XLSX error:", err);
+        setStatus("error");
+        setMessage("Erro ao processar o arquivo Excel. Verifique se é um .xlsx válido da Binance.");
+      }
+    },
+    [onImport]
+  );
+
   const handleFile = useCallback(
     async (file: File) => {
       if (disabled) return;
@@ -213,9 +262,13 @@ export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
         return handlePDF(file);
       }
 
+      if (name.endsWith(".xlsx") || name.endsWith(".xls")) {
+        return handleXLSX(file);
+      }
+
       if (!name.endsWith(".csv")) {
         setStatus("error");
-        setMessage("Formato não suportado. Selecione um arquivo CSV ou PDF.");
+        setMessage("Formato não suportado. Selecione um arquivo CSV, PDF ou Excel (.xlsx).");
         return;
       }
 
@@ -255,7 +308,7 @@ export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
         }
       }
     },
-    [onImport, disabled, handlePDF]
+    [onImport, disabled, handlePDF, handleXLSX]
   );
 
   const handleDrop = useCallback(
@@ -293,7 +346,7 @@ export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Upload className="h-5 w-5" />
-          Importar Operações (CSV ou PDF)
+          Importar Operações
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -315,12 +368,12 @@ export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
                 Arraste um arquivo CSV ou PDF, ou clique para selecionar
               </p>
               <p className="text-xs text-muted-foreground mb-4">
-                Binance PDF suportado · 9 exchanges via CSV · detecção automática
+                Binance PDF e Excel (.xlsx) · 9 exchanges via CSV · detecção automática
               </p>
               <label>
                 <input
                   type="file"
-                  accept=".csv,.pdf"
+                  accept=".csv,.pdf,.xlsx,.xls"
                   className="hidden"
                   onChange={handleInputChange}
                   disabled={disabled}
@@ -349,7 +402,7 @@ export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
               <label>
                 <input
                   type="file"
-                  accept=".csv,.pdf"
+                  accept=".csv,.pdf,.xlsx,.xls"
                   className="hidden"
                   onChange={handleInputChange}
                 />
