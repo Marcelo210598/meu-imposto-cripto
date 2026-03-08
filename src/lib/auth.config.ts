@@ -24,7 +24,7 @@ export const authConfig: NextAuthConfig = {
       const isLoggedIn = !!auth?.user;
       const pathname = request.nextUrl.pathname;
 
-      const rotasProtegidas = ["/calculadora", "/relatorio", "/perfil"];
+      const rotasProtegidas = ["/calculadora", "/relatorio", "/perfil", "/exchanges"];
       const isProtected = rotasProtegidas.some((r) => pathname.startsWith(r));
 
       if (isProtected && !isLoggedIn) return false;

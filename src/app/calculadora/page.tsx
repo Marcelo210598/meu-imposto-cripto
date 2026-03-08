@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import {
   ArrowLeft, Plus, TrendingUp, TrendingDown, DollarSign,
   AlertCircle, Trash2, AlertTriangle, CheckCircle, FileDown,
-  CloudUpload, Lock, FileText, Search, X, BarChart2, Activity,
+  CloudUpload, Lock, FileText, Search, X, BarChart2, Activity, Link2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -361,6 +361,14 @@ export default function CalculadoraPage() {
                 <CloudUpload className="h-3 w-3" />
                 Salvo na nuvem
               </span>
+            )}
+            {isLoggedIn && (
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/exchanges">
+                  <Link2 className="h-4 w-4 mr-2" />
+                  Exchanges
+                </Link>
+              </Button>
             )}
             {isLoggedIn && operacoes.length > 0 && (
               <Button variant="outline" size="sm" asChild>

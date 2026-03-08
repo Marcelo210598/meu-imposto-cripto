@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bitcoin, Menu, X, LogOut, User, ChevronDown, FileText, BarChart2 } from "lucide-react";
+import { Bitcoin, Menu, X, LogOut, User, ChevronDown, FileText, BarChart2, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useState, useEffect } from "react";
@@ -31,8 +31,9 @@ export function Header() {
     { href: "/precos",      label: "Preços"       },
     ...(session
       ? [
-          { href: "/historico", label: "Histórico"     },
-          { href: "/relatorio", label: "Relatório IRPF" },
+          { href: "/historico",  label: "Histórico"      },
+          { href: "/exchanges",  label: "Exchanges"       },
+          { href: "/relatorio",  label: "Relatório IRPF"  },
         ]
       : []),
   ];
@@ -110,10 +111,11 @@ export function Header() {
                       {session.user?.email}
                     </div>
                     {[
-                      { href: "/calculadora", label: "Minha calculadora",   icon: null       },
-                      { href: "/historico",   label: "Histórico & Gráficos", icon: BarChart2  },
-                      { href: "/relatorio",   label: "Relatório IRPF",       icon: FileText   },
-                      { href: "/perfil",      label: "Minha conta",          icon: User       },
+                      { href: "/calculadora", label: "Minha calculadora",    icon: null      },
+                      { href: "/historico",   label: "Histórico & Gráficos", icon: BarChart2 },
+                      { href: "/exchanges",   label: "Exchanges conectadas", icon: Link2     },
+                      { href: "/relatorio",   label: "Relatório IRPF",       icon: FileText  },
+                      { href: "/perfil",      label: "Minha conta",          icon: User      },
                     ].map((item) => (
                       <Link
                         key={item.href}
