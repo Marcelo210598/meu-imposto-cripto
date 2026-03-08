@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import {
   ArrowLeft, Link2, Link2Off, RefreshCw, Trash2, Plus,
   CheckCircle2, AlertCircle, Loader2, ExternalLink, Shield,
-  Clock, BarChart2,
+  Clock, BarChart2, Monitor,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -48,12 +48,15 @@ const EXCHANGES_SUPORTADAS = [
     descricao: "Maior exchange do mundo — BRL e USDT",
     cor: "bg-yellow-500/10 border-yellow-500/30",
     iconBg: "bg-yellow-500",
-    instrucoes: "https://www.binance.com/pt-BR/support/faq/como-criar-api-360002502072",
+    tutorialUrl: "https://www.binance.com/pt-BR/support/faq/como-criar-api-360002502072",
+    avisoMobile: true,
     passos: [
-      "Acesse Binance → Perfil → Gerenciamento de API",
-      "Clique em \"Criar API\" → escolha \"Chave de sistema\"",
-      "Habilite apenas \"Habilitar Leitura\" (nunca habilite saque!)",
-      "Copie a API Key e o Secret Key",
+      { texto: "Abra o site binance.com no computador ou navegador do celular (não o app)", destaque: true },
+      { texto: "Clique no ícone do seu perfil (canto superior direito) → Gerenciamento de API" },
+      { texto: "Clique em \"Criar API\" → escolha \"Chave gerada pelo sistema\" → dê um nome qualquer (ex: \"meu-imposto\")" },
+      { texto: "Confirme com e-mail ou autenticador. Quando aparecer a chave, COPIE o Secret Key imediatamente — ele só aparece uma vez!" },
+      { texto: "Em Restrições de API, marque APENAS \"Habilitar Leitura\". Nunca habilite saque ou trading!" , destaque: true },
+      { texto: "Cole a API Key e o Secret Key nos campos abaixo" },
     ],
   },
 ];
@@ -319,6 +322,27 @@ export default function ExchangesPage() {
                   </div>
                 </CardHeader>
 
+                {/* Dica rápida quando não conectada */}
+                {!conexao && (
+                  <CardContent className="pt-0">
+                    <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-xs text-amber-800 dark:text-amber-300">
+                      <Monitor className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                      <p>
+                        <strong>Não está no app mobile?</strong> A API Key fica em{" "}
+                        <a
+                          href="https://www.binance.com/pt-BR/my/settings/api-management"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline font-semibold"
+                        >
+                          binance.com → Gerenciamento de API
+                        </a>{" "}
+                        — disponível apenas no site, não no app.
+                      </p>
+                    </div>
+                  </CardContent>
+                )}
+
                 {/* Info da conexão ativa */}
                 {conexao && (
                   <CardContent className="pt-0 space-y-3">
@@ -426,24 +450,57 @@ export default function ExchangesPage() {
             </DialogDescription>
           </DialogHeader>
 
-          {/* Instruções */}
-          <div className="p-3 rounded-lg bg-muted text-xs space-y-1.5">
-            <p className="font-semibold text-foreground mb-2">Como criar a API Key:</p>
-            {exchangeAtual.passos.map((passo, i) => (
-              <div key={i} className="flex gap-2">
-                <span className="flex-shrink-0 font-bold text-primary">{i + 1}.</span>
-                <span className="text-muted-foreground">{passo}</span>
-              </div>
-            ))}
-            <a
-              href={exchangeAtual.instrucoes}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 text-primary hover:underline pt-1"
-            >
-              <ExternalLink className="h-3 w-3" />
-              Tutorial oficial da {exchangeAtual.nome}
-            </a>
+          {/* Aviso mobile */}
+          {exchangeAtual.avisoMobile && (
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-xs text-amber-800 dark:text-amber-300">
+              <Monitor className="h-4 w-4 flex-shrink-0 mt-0.5" />
+              <p>
+                <strong>Use o navegador, não o app.</strong> O gerenciamento de API Keys da Binance
+                não está disponível no app mobile — acesse{" "}
+                <a
+                  href="https://www.binance.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline font-semibold"
+                >
+                  binance.com
+                </a>{" "}
+                pelo navegador do celular ou pelo computador.
+              </p>
+            </div>
+          )}
+
+          {/* Instruções passo a passo */}
+          <div className="rounded-lg border bg-muted/40 overflow-hidden">
+            <p className="text-xs font-semibold text-foreground px-3 pt-3 pb-2 border-b bg-muted">
+              Como criar a API Key na Binance:
+            </p>
+            <div className="divide-y">
+              {exchangeAtual.passos.map((passo, i) => (
+                <div
+                  key={i}
+                  className={`flex gap-2.5 px-3 py-2.5 text-xs ${
+                    passo.destaque
+                      ? "bg-primary/5 text-foreground font-medium"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  <span className="flex-shrink-0 font-bold text-primary w-4">{i + 1}.</span>
+                  <span>{passo.texto}</span>
+                </div>
+              ))}
+            </div>
+            <div className="px-3 py-2.5 border-t">
+              <a
+                href={exchangeAtual.tutorialUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-xs text-primary hover:underline"
+              >
+                <ExternalLink className="h-3 w-3" />
+                Tutorial com imagens no site da Binance
+              </a>
+            </div>
           </div>
 
           <div className="space-y-4">
