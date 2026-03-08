@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+
+// Força execução no servidor de São Paulo — Binance bloqueia IPs dos EUA
+export const preferredRegion = ["gru1"];
 import { prisma } from "@/lib/db";
 import { decrypt } from "@/lib/encryption";
 import { sincronizarBinance } from "@/lib/exchanges/binance";
