@@ -167,7 +167,14 @@ export default function CalculadoraPage() {
           toast.success(`${cripto} adicionado com sucesso`);
         } else {
           const err = await res.json();
-          toast.error(err.error ?? "Erro ao salvar operação");
+          if (res.status === 403 && err.upgrade) {
+            toast.error(err.error, {
+              action: { label: "Ver planos", onClick: () => window.location.href = "/precos" },
+              duration: 8000,
+            });
+          } else {
+            toast.error(err.error ?? "Erro ao salvar operação");
+          }
           return;
         }
       } catch {
@@ -219,7 +226,15 @@ export default function CalculadoraPage() {
           setOperacoes((prev) => [...saved, ...prev]);
           toast.success(`${saved.length} operações importadas com sucesso`);
         } else {
-          toast.error("Erro ao importar operações");
+          const err = await res.json();
+          if (res.status === 403 && err.upgrade) {
+            toast.error(err.error, {
+              action: { label: "Ver planos", onClick: () => window.location.href = "/precos" },
+              duration: 8000,
+            });
+          } else {
+            toast.error(err.error ?? "Erro ao importar operações");
+          }
         }
       } catch {
         toast.error("Erro de conexão ao importar");

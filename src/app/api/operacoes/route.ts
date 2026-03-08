@@ -61,6 +61,25 @@ export async function POST(req: NextRequest) {
 
   const items = parsed.data;
   const userId = session.user.id as string;
+  const userPlano = (session.user as { plano?: string }).plano ?? "gratis";
+
+  // Paywall: plano grátis limitado a 50 operações no banco
+  if (userPlano === "gratis") {
+    const count = await prisma.operacao.count({ where: { userId } });
+    const remaining = 50 - count;
+    if (remaining <= 0) {
+      return NextResponse.json(
+        { error: "Limite de 50 operações atingido. Faça upgrade para o plano Pro para operações ilimitadas.", upgrade: true },
+        { status: 403 }
+      );
+    }
+    if (items.length > remaining) {
+      return NextResponse.json(
+        { error: `Você pode adicionar apenas mais ${remaining} operação(ões) no plano Grátis. Faça upgrade para o plano Pro.`, upgrade: true },
+        { status: 403 }
+      );
+    }
+  }
 
   const created = await prisma.$transaction(
     items.map((op) =>
