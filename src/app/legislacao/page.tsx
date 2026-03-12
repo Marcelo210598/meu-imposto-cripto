@@ -51,7 +51,7 @@ const timeline = [
     ano: "Jul 2026",
     titulo: "DeCripto entra em vigor",
     descricao:
-      "Novo modelo de reporte obrigatório. Exchanges estrangeiras também são obrigadas a reportar operações de brasileiros à Receita Federal. Escopo ampliado: inclui staking, DeFi, NFTs e carteiras self-custody com saldo acima de R$5mil.",
+      "Novo modelo de reporte obrigatório. Exchanges estrangeiras também serão obrigadas a reportar operações de brasileiros à Receita Federal. Escopo ampliado: pode incluir staking, DeFi, NFTs e carteiras self-custody — os limites e condições exatos estão definidos na IN RFB 2.291/2025.",
     status: "futuro",
   },
 ];
@@ -96,8 +96,8 @@ const regras = [
     bg: "bg-purple-50 dark:bg-purple-950",
     titulo: "Declaração Anual (IRPF)",
     descricao:
-      'Criptoativos devem ser declarados na ficha "Bens e Direitos" do IRPF anual se o custo de aquisição for superior a R$ 5.000. Mesmo em prejuízo, a declaração é obrigatória se você tiver saldo acima desse limite.',
-    detalhe: "Código 89 — Demais bens e direitos (cripto)",
+      'Criptoativos em geral devem ser declarados na ficha "Bens e Direitos" do IRPF anual quando o custo de aquisição total for superior a R$ 5.000. Mesmo sem ter vendido nada, a declaração é obrigatória se o saldo superar esse limite. O enquadramento e o código de declaração podem variar conforme o tipo de criptoativo e as instruções do programa DIRPF do ano-calendário correspondente — consulte o guia da Receita Federal vigente ou um contador para confirmar o código correto para cada ativo.',
+    detalhe: "Código 89 tende a ser utilizado para criptomoedas em geral — verifique as instruções do DIRPF do ano vigente para cada tipo de ativo",
   },
   {
     icon: Globe,
@@ -105,8 +105,8 @@ const regras = [
     bg: "bg-orange-50 dark:bg-orange-950",
     titulo: "Criptoativos no exterior — Lei 14.754/2023",
     descricao:
-      'Operações em exchanges SEM CNPJ no Brasil (Binance global, Bybit, Coinbase, Kraken, OKX etc.) seguem a Lei 14.754/2023: alíquota fixa de 15% sobre o lucro líquido anual, sem a isenção de R$ 35.000/mês, e apuração anual na Declaração de Ajuste Anual (não via DARF mensal). Prejuízos do mesmo ano compensam ganhos, mas não são carregados ao ano seguinte. Obrigações acessórias: (1) declaração no CBE ao BACEN se saldo > US$ 1.000; (2) reporte via e-CAC se movimentação mensal superar R$ 30.000 (IN 1.888/2019).',
-    detalhe: "Lei 14.754/2023 + IN RFB 2.180/2024 · 15% flat · sem isenção de R$ 35k",
+      'A Lei 14.754/2023 criou um regime específico para investimentos em plataformas no exterior. Em regra, aplica-se quando os criptoativos estão custodiados por instituição localizada fora do Brasil e há um intermediário estrangeiro na operação — o que tende a coincidir com o uso de exchanges sem CNPJ no Brasil, mas o enquadramento correto depende da natureza da operação e deve ser avaliado caso a caso. Quando aplicável: alíquota fixa de 15% sobre o lucro líquido anual, sem a isenção de R$ 35.000/mês, e apuração anual na Declaração de Ajuste Anual (não via DARF mensal). Prejuízos do ano compensam ganhos do mesmo ano. Obrigações acessórias: (1) CBE ao BACEN — obrigatório se saldo em 31/12 for igual ou superior a US$ 1.000.000 (CBE anual) ou US$ 100.000.000 em qualquer trimestre (CBE trimestral) — obrigação distinta do IRPF; (2) reporte via e-CAC se movimentação mensal superar R$ 30.000, incluindo operações fora de exchanges quando aplicável (IN 1.888/2019). Autocustódia (wallets próprias, hardware wallets) e operações em DEX não devem ser tratadas automaticamente como "ativo no exterior" — o enquadramento depende da natureza da operação.',
+    detalhe: "Lei 14.754/2023 + IN RFB 2.180/2024 · 15% sobre lucro anual · sem isenção de R$ 35k · consulte especialista para casos de custódia própria e DEX",
   },
   {
     icon: Scale,
@@ -123,7 +123,7 @@ const faqLegislacao = [
   {
     pergunta: "Troca de cripto por cripto (BTC → ETH) é tributada?",
     resposta:
-      "Sim. A Receita Federal entende que qualquer troca de criptoativos é um fato gerador de IR, mesmo sem conversão para reais. O valor de mercado no momento da troca é usado como base de cálculo. A regra de isenção dos R$ 35.000/mês também se aplica.",
+      "Em regra, a Receita Federal entende que a troca de criptoativos pode constituir fato gerador de IR, mesmo sem conversão para reais. O valor de mercado no momento da troca tende a ser usado como base de cálculo. Para operações em exchanges nacionais, a regra de isenção dos R$ 35.000/mês pode se aplicar. Para operações em exchanges sujeitas à Lei 14.754/2023, não há faixa de isenção — a tributação é anual e incide sobre o resultado líquido. Trocas realizadas diretamente em wallets ou DEX têm enquadramento menos consolidado e devem ser analisadas caso a caso.",
   },
   {
     pergunta: "Staking e yield farming são tributados?",
@@ -133,12 +133,12 @@ const faqLegislacao = [
   {
     pergunta: "NFTs pagam imposto?",
     resposta:
-      "Sim. A venda de NFTs com lucro segue as mesmas regras de ganho de capital. A isenção de R$ 35.000/mês também se aplica. O custo de aquisição é o valor pago em reais na compra.",
+      "Em regra, a venda de NFTs com lucro tende a ser tratada como ganho de capital. No entanto, o enquadramento pode variar conforme a natureza do ativo — NFTs que representem utilidade, acesso a serviços ou outras formas de ativo podem ter tratamento distinto. Não existe regra única e definitiva para todos os NFTs. Recomendamos consultar um especialista para casos específicos, especialmente em volumes relevantes. A isenção de R$ 35.000/mês em regra se aplica quando as operações ocorrem em exchanges nacionais.",
   },
   {
     pergunta: "Posso compensar prejuízos de cripto?",
     resposta:
-      "Sim! Prejuízos de cripto podem ser compensados com ganhos futuros de cripto para reduzir a base de cálculo do IR. O prejuízo deve ser registrado na declaração anual mesmo que não gere imposto a pagar.",
+      "Sim, em regra. No regime nacional (exchanges com CNPJ no Brasil), prejuízos com criptoativos podem ser compensados com ganhos futuros de criptoativos do mesmo regime, mês a mês. No regime da Lei 14.754/2023 (plataformas no exterior), prejuízos dentro do mesmo ano-calendário compensam ganhos do mesmo regime — os não utilizados podem ser aproveitados em anos posteriores. Importante: os regimes não se comunicam entre si para fins de compensação. O prejuízo deve ser registrado na declaração anual.",
   },
   {
     pergunta: "O que muda com a DeCripto em 2026?",
@@ -242,9 +242,14 @@ export default function LegislacaoPage() {
                 </p>
                 <p className="text-sm text-amber-700 dark:text-amber-300">
                   As informações aqui são de caráter educativo e não constituem
-                  consultoria fiscal ou jurídica. A legislação tributária está
-                  sujeita a alterações. Para sua situação específica, consulte
-                  um contador ou advogado tributarista.
+                  consultoria fiscal ou jurídica. O conteúdo mistura diferentes
+                  hierarquias normativas: leis (fontes primárias), instruções
+                  normativas da Receita Federal (obrigações acessórias e
+                  reporte), orientações de preenchimento da DIRPF (caráter
+                  declaratório) e interpretações sobre temas ainda não
+                  consolidados. Muitos pontos envolvem cautela e podem depender
+                  de consulta especializada. A legislação tributária está sujeita
+                  a alterações.
                 </p>
               </div>
             </div>
@@ -393,13 +398,13 @@ export default function LegislacaoPage() {
                       "Exchanges estrangeiras obrigadas a reportar",
                       "Inclui operações DeFi e NFTs",
                       "Troca automática de dados entre países",
-                      "Carteiras self-custody acima de R$5k",
+                      "Reporte de carteiras self-custody acima de R$ 5k (quando aplicável)",
                     ],
                   },
                   {
                     titulo: "O que permanece igual",
                     itens: [
-                      "Isenção de R$ 35.000/mês",
+                      "Isenção de R$ 35.000/mês (regime nacional)",
                       "Alíquotas de 15% a 22,5%",
                       "DARF para recolhimento mensal",
                       "Declaração anual no IRPF",

@@ -36,12 +36,12 @@ const faqs = [
       {
         pergunta: "Troca de uma cripto por outra é tributável?",
         resposta:
-          "Sim. A troca (swap) de uma criptomoeda por outra é considerada uma venda seguida de uma compra. Portanto, se houver ganho na 'venda' da primeira cripto, e o total mensal ultrapassar R$ 35.000, há tributação.",
+          "Em regra, a troca (swap) de uma criptomoeda por outra tende a ser tratada como uma venda seguida de uma compra para fins de IR. No regime nacional (exchanges com CNPJ no Brasil), se houver ganho e o total mensal de vendas ultrapassar R$ 35.000, há tributação. No regime da Lei 14.754/2023 (plataformas no exterior), a troca também pode gerar imposto, mas sem a faixa de isenção de R$ 35.000. Trocas realizadas diretamente em wallets próprias ou DEX sem intermediário têm enquadramento menos consolidado e devem ser analisadas conforme a situação específica.",
       },
       {
         pergunta: "Stablecoins como USDT são tributáveis?",
         resposta:
-          "Sim. Stablecoins são criptoativos e seguem as mesmas regras. Converter Bitcoin para USDT, por exemplo, é considerado uma venda de Bitcoin.",
+          "Em regra, stablecoins são tratadas como criptoativos e a conversão de um criptoativo para stablecoin tende a ser considerada uma venda para fins de IR. O regime aplicável (nacional ou exterior, Lei 14.754/2023) depende da plataforma onde a operação ocorre. Operações em exchanges nacionais seguem as regras do regime nacional com isenção de R$ 35.000/mês; em exchanges estrangeiras, seguem a apuração anual sem isenção. O enquadramento de cada operação deve ser avaliado conforme o contexto.",
       },
     ],
   },
@@ -91,7 +91,7 @@ const faqs = [
       {
         pergunta: "Preciso declarar mesmo se não paguei imposto?",
         resposta:
-          "Sim. Mesmo operações isentas (vendas abaixo de R$ 35.000) devem ser informadas na declaração anual de IR, na ficha de Bens e Direitos (código 89 — Demais bens e direitos). O código 89 é o correto atualizado para criptoativos.",
+          "Sim. Mesmo operações isentas devem ser informadas na declaração anual de IR, na ficha de Bens e Direitos. O código de declaração pode variar conforme o tipo de criptoativo — o código 89 (Demais bens e direitos) tende a ser utilizado para criptomoedas em geral, mas verifique as instruções do programa DIRPF do ano-calendário correspondente, pois as orientações da Receita Federal podem ser atualizadas. Em caso de dúvida, consulte um contador.",
       },
     ],
   },
@@ -101,7 +101,7 @@ const faqs = [
       {
         pergunta: "Por que exchanges estrangeiras têm regras diferentes?",
         resposta:
-          "A Lei 14.754/2023 criou um regime tributário específico para criptoativos mantidos em plataformas no exterior (sem CNPJ no Brasil). O objetivo foi regularizar a tributação de investidores que operam em exchanges como Binance global, Bybit, Coinbase, Kraken e OKX. As regras são: (1) 15% flat sobre o lucro líquido anual — sem alíquota progressiva; (2) sem isenção de R$ 35.000/mês; (3) apuração anual paga na DAA (Declaração de Ajuste Anual), não via DARF mensal.",
+          "A Lei 14.754/2023 criou um regime tributário específico para investimentos em entidades no exterior. O critério central é o enquadramento jurídico da operação — localização da instituição custodiante, existência de intermediário estrangeiro e natureza do ativo — não apenas a existência ou ausência de CNPJ no Brasil. Na prática, exchanges reconhecidamente estrangeiras como Binance global, Bybit, Coinbase, Kraken e OKX tendem a se enquadrar neste regime. As regras quando aplicável: (1) 15% sobre o lucro líquido anual — sem alíquota progressiva; (2) sem isenção de R$ 35.000/mês; (3) apuração anual paga na Declaração de Ajuste Anual, não via DARF mensal. Para situações atípicas (ex.: DEX, autocustódia, operações mistas), o enquadramento deve ser avaliado com cautela.",
       },
       {
         pergunta: "A Binance é brasileira ou estrangeira?",
@@ -116,7 +116,12 @@ const faqs = [
       {
         pergunta: "O que é a obrigação do e-CAC para exchanges estrangeiras?",
         resposta:
-          "Independentemente do imposto, se você movimentou mais de R$ 30.000 em um mês em exchanges estrangeiras, é obrigado a informar essas operações à Receita Federal via e-CAC (portal da Receita) até o último dia útil do mês seguinte. Essa é uma obrigação acessória (IN 1.888/2019) — separada do pagamento do imposto.",
+          "A IN 1.888/2019 estabelece obrigação de reporte quando o volume mensal em criptoativos supera R$ 30.000. Essa obrigação não se limita apenas a exchanges estrangeiras — pode alcançar operações realizadas fora de exchange quando aplicável. O reporte é feito via e-CAC (portal da Receita Federal) até o último dia útil do mês seguinte. Trata-se de obrigação acessória, separada do pagamento do imposto. A ferramenta identifica automaticamente quando esse limite é atingido em exchanges informadas pelo usuário, mas não cobre operações em wallets próprias ou DEX.",
+      },
+      {
+        pergunta: "Wallet própria, MetaMask ou DEX seguem as mesmas regras de exchanges estrangeiras?",
+        resposta:
+          "Não necessariamente. Autocustódia (wallet própria, hardware wallet, MetaMask) e operações em DEX sem intermediário não devem ser tratadas automaticamente como 'ativo no exterior' só porque envolvem tecnologia descentralizada ou acesso a protocolos estrangeiros. O enquadramento tributário depende da natureza da operação, da existência de intermediário e da forma de custódia. Esse é um tema com interpretações ainda em desenvolvimento na doutrina e na prática administrativa — recomendamos consultar um especialista para essas situações.",
       },
     ],
   },
