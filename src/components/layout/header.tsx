@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bitcoin, Menu, X, LogOut, User, ChevronDown, FileText, BarChart2, Link2 } from "lucide-react";
+import { Bitcoin, Menu, X, LogOut, User, ChevronDown, FileText, BarChart2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useState, useEffect } from "react";
@@ -32,7 +32,6 @@ export function Header() {
     ...(session
       ? [
           { href: "/historico",  label: "Histórico"      },
-          { href: "/exchanges",  label: "Exchanges"       },
           { href: "/relatorio",  label: "Relatório IRPF"  },
         ]
       : []),
@@ -83,7 +82,14 @@ export function Header() {
           <ThemeToggle />
 
           {status === "loading" ? (
-            <div className="h-9 w-24 animate-shimmer rounded-md" />
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/login">Entrar</Link>
+              </Button>
+              <Button size="sm" asChild className="shadow-sm">
+                <Link href="/register">Criar conta</Link>
+              </Button>
+            </div>
           ) : session ? (
             <div className="relative">
               <button
@@ -113,7 +119,6 @@ export function Header() {
                     {[
                       { href: "/calculadora", label: "Minha calculadora",    icon: null      },
                       { href: "/historico",   label: "Histórico & Gráficos", icon: BarChart2 },
-                      { href: "/exchanges",   label: "Exchanges conectadas", icon: Link2     },
                       { href: "/relatorio",   label: "Relatório IRPF",       icon: FileText  },
                       { href: "/perfil",      label: "Minha conta",          icon: User      },
                     ].map((item) => (

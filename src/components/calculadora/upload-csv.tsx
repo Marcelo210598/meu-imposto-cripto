@@ -161,14 +161,35 @@ export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
           const content = await page.getTextContent();
-          let pageText = "";
+
+          // Extração posicional: agrupa itens por posição Y (coordenada vertical)
+          // e ordena por X dentro de cada linha — garante a ordem correta das colunas
+          // mesmo em PDFs com tabelas complexas.
+          type TextItem = { str: string; x: number; y: number };
+          const items: TextItem[] = [];
           for (const item of content.items) {
-            if ("str" in item) {
-              pageText += item.str;
-              pageText += item.hasEOL ? "\n" : " ";
+            if ("str" in item && item.str.trim()) {
+              const t = (item as { transform: number[]; str: string }).transform;
+              items.push({ str: item.str, x: t[4], y: t[5] });
             }
           }
-          text += pageText + "\n";
+
+          // Ordena: Y decrescente (PDF é bottom-up), depois X crescente
+          items.sort((a, b) => b.y - a.y || a.x - b.x);
+
+          // Agrupa por Y com tolerância de 3 pontos
+          const rows: TextItem[][] = [];
+          let rowY = -Infinity;
+          for (const item of items) {
+            if (Math.abs(item.y - rowY) > 3) {
+              rows.push([item]);
+              rowY = item.y;
+            } else {
+              rows[rows.length - 1].push(item);
+            }
+          }
+
+          text += rows.map((r) => r.map((i) => i.str).join(" ")).join("\n") + "\n";
         }
 
         const { parseBinancePDF } = await import("@/lib/pdf-parser");
@@ -177,7 +198,7 @@ export function UploadCSV({ onImport, disabled = false }: UploadCSVProps) {
         if (operacoes.length === 0) {
           setStatus("error");
           setMessage(
-            'Nenhuma operação encontrada. Exporte "Spot - Histórico de Trades" pela Central de Download de Dados da Binance.'
+            'Nenhuma operação encontrada no PDF. Certifique-se de exportar "Spot - Histórico de Trades" (não Transaction History) na Central de Download de Dados da Binance. Tente também o formato Excel (.xlsx) — costuma funcionar melhor.'
           );
           return;
         }

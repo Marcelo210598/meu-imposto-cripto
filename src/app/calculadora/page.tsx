@@ -411,6 +411,29 @@ export default function CalculadoraPage() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        {/* Banner: usuário free logado — uso de operações */}
+        {isLoggedIn && (session?.user as { plano?: string })?.plano === "gratis" && status !== "loading" && (
+          <div className="mb-4 p-4 rounded-xl bg-amber-500/5 border border-amber-500/20 flex items-center justify-between gap-4 flex-wrap animate-fade-in">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0" />
+              <div className="min-w-0">
+                <p className="font-medium text-sm">
+                  Você está usando <span className="text-amber-600 font-bold">{operacoes.length}/{LIMITE_FREE}</span> operações
+                </p>
+                <div className="mt-1.5 w-full bg-amber-500/10 rounded-full h-1.5 max-w-xs">
+                  <div
+                    className="bg-amber-500 h-1.5 rounded-full transition-all"
+                    style={{ width: `${Math.min((operacoes.length / LIMITE_FREE) * 100, 100)}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+            <Button size="sm" asChild className="bg-amber-500 hover:bg-amber-600 text-white flex-shrink-0">
+              <Link href="/precos">Ver plano Pro</Link>
+            </Button>
+          </div>
+        )}
+
         {/* Banner: não logado */}
         {!isLoggedIn && status !== "loading" && (
           <div className="mb-6 p-4 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-between gap-4 flex-wrap animate-fade-in">
@@ -547,8 +570,11 @@ export default function CalculadoraPage() {
                         value={novaOperacao.quantidade}
                         className={formErrors.quantidade ? "border-destructive" : ""}
                         onChange={(e) => {
-                          setNovaOperacao({ ...novaOperacao, quantidade: e.target.value });
-                          setFormErrors((prev) => ({ ...prev, quantidade: undefined }));
+                          const v = e.target.value;
+                          setNovaOperacao({ ...novaOperacao, quantidade: v });
+                          const n = parseFloat(v);
+                          if (v && !isNaN(n) && n > 0)
+                            setFormErrors((prev) => ({ ...prev, quantidade: undefined }));
                         }}
                       />
                       {formErrors.quantidade && (
@@ -566,8 +592,11 @@ export default function CalculadoraPage() {
                         value={novaOperacao.valorTotal}
                         className={formErrors.valorTotal ? "border-destructive" : ""}
                         onChange={(e) => {
-                          setNovaOperacao({ ...novaOperacao, valorTotal: e.target.value });
-                          setFormErrors((prev) => ({ ...prev, valorTotal: undefined }));
+                          const v = e.target.value;
+                          setNovaOperacao({ ...novaOperacao, valorTotal: v });
+                          const n = parseFloat(v);
+                          if (v && !isNaN(n) && n > 0)
+                            setFormErrors((prev) => ({ ...prev, valorTotal: undefined }));
                         }}
                       />
                       {formErrors.valorTotal && (
@@ -776,7 +805,30 @@ export default function CalculadoraPage() {
                     {formatCurrency(resumoMesAtual.lucroTotal)}
                   </span>
                 </div>
-                <div className="border-t pt-4">
+                <div className="border-t pt-4 space-y-2">
+                  {/* Alerta Day Trade */}
+                  {"temDayTrade" in resumoMesAtual && resumoMesAtual.temDayTrade && (
+                    <div className="flex items-start gap-2 p-3 rounded-xl bg-orange-50 text-orange-800 dark:bg-orange-950/40 dark:text-orange-300">
+                      <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-xs">Day Trade detectado</p>
+                        <p className="text-[11px] mt-0.5">Sem isenção R$35k · Alíquota 20% flat</p>
+                      </div>
+                    </div>
+                  )}
+                  {/* Compensação de prejuízo */}
+                  {"prejuizoCompensado" in resumoMesAtual && (resumoMesAtual.prejuizoCompensado ?? 0) > 0 && (
+                    <div className="flex items-start gap-2 p-3 rounded-xl bg-blue-50 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300">
+                      <CheckCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-xs">Prejuízo compensado</p>
+                        <p className="text-[11px] mt-0.5">
+                          {formatCurrency(resumoMesAtual.prejuizoCompensado ?? 0)} deduzidos de meses anteriores
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {/* Status do imposto */}
                   {resumoMesAtual.isento ? (
                     <div className="flex items-start gap-2 p-3 rounded-xl bg-green-50 text-green-800 dark:bg-green-950/40 dark:text-green-300">
                       <CheckCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
@@ -813,11 +865,15 @@ export default function CalculadoraPage() {
               </CardHeader>
               <CardContent className="text-sm text-muted-foreground space-y-3">
                 <div className="p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
-                  <p className="font-medium text-foreground text-sm">Isenção</p>
+                  <p className="font-medium text-foreground text-sm">Isenção (swing trade)</p>
                   <p className="text-xs mt-0.5">Vendas até R$ 35.000/mês são isentas</p>
                 </div>
+                <div className="p-3 bg-orange-50 dark:bg-orange-950/30 rounded-lg border border-orange-200 dark:border-orange-800">
+                  <p className="font-medium text-orange-800 dark:text-orange-300 text-sm">Day Trade</p>
+                  <p className="text-xs mt-0.5 text-orange-700 dark:text-orange-400">Sem isenção de R$ 35k · Alíquota fixa de 20%</p>
+                </div>
                 <div className="p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
-                  <p className="font-medium text-foreground text-sm">Alíquotas</p>
+                  <p className="font-medium text-foreground text-sm">Alíquotas (swing)</p>
                   <ul className="mt-1.5 space-y-1 text-xs">
                     <li className="flex justify-between"><span>Até R$ 5M</span><span className="font-medium">15%</span></li>
                     <li className="flex justify-between"><span>R$ 5M a 10M</span><span className="font-medium">17,5%</span></li>
@@ -827,7 +883,7 @@ export default function CalculadoraPage() {
                 </div>
                 <div className="p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
                   <p className="font-medium text-foreground text-sm">Vencimento</p>
-                  <p className="text-xs mt-0.5">Último dia útil do mês seguinte à venda</p>
+                  <p className="text-xs mt-0.5">Último dia útil do mês seguinte · DARF código 4600</p>
                 </div>
                 <Link
                   href="/legislacao"

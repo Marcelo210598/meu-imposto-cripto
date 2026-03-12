@@ -7,7 +7,7 @@ const { auth } = NextAuth(authConfig);
 
 export default auth((req) => {
   const pathname = req.nextUrl.pathname;
-  const rotasProtegidas = ["/calculadora", "/relatorio", "/perfil"];
+  const rotasProtegidas = ["/relatorio", "/perfil"];
   const isProtected = rotasProtegidas.some((r) => pathname.startsWith(r));
 
   if (isProtected && !req.auth) {

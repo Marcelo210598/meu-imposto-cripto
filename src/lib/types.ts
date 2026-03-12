@@ -21,6 +21,11 @@ export interface ResumoMensal {
   totalVendas: number;
   totalCompras: number;
   lucroTotal: number;
+  lucroRegular: number;       // ganho de operações swing/hold
+  lucroDayTrade: number;      // ganho de operações day trade (alíquota 20% flat)
+  temDayTrade: boolean;       // mês contém day trade → sem isenção R$35k
+  prejuizoCompensado: number; // valor de perdas anteriores compensadas neste mês
+  prejuizoAcumuladoRestante: number; // perdas restantes a carregar pro próximo mês
   impostoDevido: number;
   isento: boolean;
   operacoes: Operacao[];

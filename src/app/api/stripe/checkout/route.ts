@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     select: { stripeCustomerId: true, email: true, name: true },
   });
 
-  const baseUrl = process.env.NEXTAUTH_URL ?? "https://workspace-tau-olive.vercel.app";
+  const baseUrl = process.env.NEXTAUTH_URL ?? process.env.AUTH_URL ?? "https://meu-imposto-cripto.vercel.app";
 
   let checkoutSession;
   try {

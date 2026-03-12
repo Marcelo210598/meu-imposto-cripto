@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Analytics } from "@/components/analytics";
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "sonner";
+import { AiChat } from "@/components/ai/AiChat";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -15,8 +16,8 @@ const siteConfig = {
   name: "Meu Imposto Cripto",
   description:
     "Calculadora gratuita de Imposto de Renda para operações com criptomoedas no Brasil. Calcule preço médio, ganho de capital e imposto devido de forma simples e precisa.",
-  url: "https://workspace-tau-olive.vercel.app",
-  ogImage: "https://workspace-tau-olive.vercel.app/og-image.png",
+  url: "https://meu-imposto-cripto.vercel.app",
+  ogImage: "https://meu-imposto-cripto.vercel.app/og-image.png",
   creator: "@meuimpostocripto",
 };
 
@@ -117,8 +118,6 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#16a34a" />
         <script
@@ -131,6 +130,7 @@ export default function RootLayout({
           <ThemeProvider>{children}</ThemeProvider>
         </SessionProvider>
         <Toaster richColors position="top-right" />
+        <AiChat />
         <Analytics />
       </body>
     </html>

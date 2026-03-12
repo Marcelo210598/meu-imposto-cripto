@@ -95,12 +95,16 @@ export function calcularImposto(ganho: number): number {
 
 /**
  * Agrupa operações por mês e calcula resumo mensal.
- * Complexidade: O(n log n) — portfolio incremental, sem recálculo por mês.
+ * Implementa:
+ * - Compensação de prejuízo entre meses (carryforward anual)
+ * - Detecção de day trade (compra e venda do mesmo ativo no mesmo dia)
+ * - Day trade: alíquota 20% flat, sem isenção de R$35k
+ * - Operações regulares: isenção R$35k, alíquotas progressivas 15-22,5%
  */
 export function calcularResumosMensais(operacoes: Operacao[]): ResumoMensal[] {
   if (operacoes.length === 0) return [];
 
-  // Agrupar por mês mantendo ordem de inserção
+  // Agrupar por mês
   const mesesMap = new Map<string, Operacao[]>();
   for (const op of operacoes) {
     const mes = op.data.substring(0, 7);
@@ -111,17 +115,42 @@ export function calcularResumosMensais(operacoes: Operacao[]): ResumoMensal[] {
 
   const mesesOrdenados = Array.from(mesesMap.keys()).sort();
 
-  // Portfolio incremental — atualizado mês a mês sem reprocessar histórico
+  // Portfolio incremental
   const portfolioMap = new Map<string, PortfolioCripto>();
-
   const resumos: ResumoMensal[] = [];
 
+  // Carryforward de prejuízo (separado por tipo: regular e day trade)
+  let prejuizoRegularAcumulado = 0;
+  let prejuizoDayTradeAcumulado = 0;
+
+  // Reset anual do carryforward (RFB permite compensar só dentro do mesmo ano)
+  let anoAnterior = "";
+
   for (const mes of mesesOrdenados) {
+    const anoAtual = mes.substring(0, 4);
+    if (anoAtual !== anoAnterior) {
+      // Virada de ano: zera carryforward (não pode levar pra próximo ano)
+      prejuizoRegularAcumulado = 0;
+      prejuizoDayTradeAcumulado = 0;
+      anoAnterior = anoAtual;
+    }
+
     const opsMes = mesesMap.get(mes)!;
     const compras = opsMes.filter((op) => op.tipo === "compra");
     const vendas  = opsMes.filter((op) => op.tipo === "venda");
 
-    // 1. Aplica compras do mês ao portfolio (afeta custo médio das vendas do mesmo mês)
+    // 1. Detectar day trades: mesmo cripto com compra E venda na mesma data
+    const dayTradeKeys = new Set<string>(); // "cripto|data"
+    for (const compra of compras) {
+      for (const venda of vendas) {
+        if (compra.cripto === venda.cripto && compra.data === venda.data) {
+          dayTradeKeys.add(`${venda.cripto}|${venda.data}`);
+        }
+      }
+    }
+    const temDayTrade = dayTradeKeys.size > 0;
+
+    // 2. Aplica compras ao portfolio
     for (const op of compras) {
       const atual = portfolioMap.get(op.cripto) ?? {
         cripto: op.cripto, quantidade: 0, precoMedio: 0, custoTotal: 0,
@@ -129,22 +158,23 @@ export function calcularResumosMensais(operacoes: Operacao[]): ResumoMensal[] {
       const novaQtd   = atual.quantidade + op.quantidade;
       const novoCusto = atual.custoTotal + op.valorTotal;
       portfolioMap.set(op.cripto, {
-        cripto:      op.cripto,
-        quantidade:  novaQtd,
-        precoMedio:  novaQtd > 0 ? novoCusto / novaQtd : 0,
-        custoTotal:  novoCusto,
+        cripto:     op.cripto,
+        quantidade: novaQtd,
+        precoMedio: novaQtd > 0 ? novoCusto / novaQtd : 0,
+        custoTotal: novoCusto,
       });
     }
 
-    // 2. Calcula lucro das vendas com o portfolio atual
-    const totalVendas  = vendas.reduce((acc, op) => acc + op.valorTotal, 0);
-    const totalCompras = compras.reduce((acc, op) => acc + op.valorTotal, 0);
-    let lucroTotal = 0;
-    for (const venda of vendas) {
-      lucroTotal += calcularLucroVenda(venda, portfolioMap);
-    }
+    // 3. Separa vendas em day trade e regulares, calcula lucros
+    const vendasDayTrade  = vendas.filter((v) => dayTradeKeys.has(`${v.cripto}|${v.data}`));
+    const vendasRegulares = vendas.filter((v) => !dayTradeKeys.has(`${v.cripto}|${v.data}`));
 
-    // 3. Aplica vendas ao portfolio (reduz quantidades para os próximos meses)
+    let lucroRegular   = 0;
+    let lucroDayTrade  = 0;
+    for (const v of vendasRegulares) lucroRegular  += calcularLucroVenda(v, portfolioMap);
+    for (const v of vendasDayTrade)  lucroDayTrade += calcularLucroVenda(v, portfolioMap);
+
+    // 4. Aplica vendas ao portfolio
     for (const op of vendas) {
       const atual = portfolioMap.get(op.cripto);
       if (!atual) continue;
@@ -153,13 +183,50 @@ export function calcularResumosMensais(operacoes: Operacao[]): ResumoMensal[] {
       portfolioMap.set(op.cripto, { ...atual, quantidade: novaQtd, custoTotal: novoCusto });
     }
 
-    const isento = totalVendas <= LIMITE_ISENCAO_MENSAL;
+    const totalVendas          = vendas.reduce((acc, op) => acc + op.valorTotal, 0);
+    const totalCompras         = compras.reduce((acc, op) => acc + op.valorTotal, 0);
+    const totalVendasRegulares = vendasRegulares.reduce((acc, op) => acc + op.valorTotal, 0);
+
+    // 5. Imposto sobre operações regulares (com isenção R$35k e carryforward)
+    let impostoRegular     = 0;
+    let prejuizoCompensado = 0;
+    const isentoRegular    = totalVendasRegulares <= LIMITE_ISENCAO_MENSAL;
+
+    if (!isentoRegular && lucroRegular > 0) {
+      const compensacao = Math.min(lucroRegular, prejuizoRegularAcumulado);
+      prejuizoCompensado = compensacao;
+      prejuizoRegularAcumulado -= compensacao;
+      impostoRegular = calcularImposto(lucroRegular - compensacao);
+    } else if (lucroRegular < 0) {
+      // Acumula prejuízo para compensar em meses futuros do mesmo ano
+      prejuizoRegularAcumulado += Math.abs(lucroRegular);
+    }
+
+    // 6. Imposto sobre day trade: 20% flat, sem isenção, sem carryforward de regular
+    let impostoDayTrade = 0;
+    if (lucroDayTrade > 0) {
+      const compensacaoDT = Math.min(lucroDayTrade, prejuizoDayTradeAcumulado);
+      prejuizoDayTradeAcumulado -= compensacaoDT;
+      impostoDayTrade = (lucroDayTrade - compensacaoDT) * 0.20;
+    } else if (lucroDayTrade < 0) {
+      prejuizoDayTradeAcumulado += Math.abs(lucroDayTrade);
+    }
+
+    const impostoDevido = impostoRegular + impostoDayTrade;
+    const isento        = impostoDevido === 0;
+    const lucroTotal    = lucroRegular + lucroDayTrade;
+
     resumos.push({
       mes,
       totalVendas,
       totalCompras,
       lucroTotal,
-      impostoDevido: isento ? 0 : calcularImposto(Math.max(0, lucroTotal)),
+      lucroRegular,
+      lucroDayTrade,
+      temDayTrade,
+      prejuizoCompensado,
+      prejuizoAcumuladoRestante: prejuizoRegularAcumulado,
+      impostoDevido,
       isento,
       operacoes: opsMes,
     });

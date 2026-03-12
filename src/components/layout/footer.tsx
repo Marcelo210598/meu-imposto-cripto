@@ -30,12 +30,12 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="#how-it-works" className="hover:text-foreground transition-colors">
+                <Link href="/#how-it-works" className="hover:text-foreground transition-colors">
                   Como Funciona
                 </Link>
               </li>
               <li>
-                <Link href="#pricing" className="hover:text-foreground transition-colors">
+                <Link href="/precos" className="hover:text-foreground transition-colors">
                   Preços
                 </Link>
               </li>

@@ -96,16 +96,32 @@ export function parseBinanceXLSX(rows: XlsxRow[]): Operacao[] {
 
 const EXCHANGES_USD = ["USDT", "USD", "USDC", "BUSD"];
 
-// Regex: captura cada linha de trade
+// Regex principal — Binance Spot Trade History PDF (PT-BR e EN)
+//
+// Formato: "26-03-02 21:11:06 ETHBRL SELL 10502.13 0.1705ETH 1790.613165BRL 1.79BRL"
+//
+// Variações suportadas:
+//   - Número e unidade juntos:  0.1705ETH  ou separados: 0.1705 ETH
+//   - Decimais com ponto ou vírgula: 1.790,61 ou 1790.61
+//   - Linha sem âncora (pdfjs pode adicionar lixo no início)
+//
 // Grupos:
-//   1 — data     (YY-MM-DD)
-//   2 — par      (ex: ETHBRL, ETHUSDT)
-//   3 — lado     (BUY | SELL)
-//   4 — preço
-//   5 — executado (qty sem unidade)
-//   6 — quantidade/total (valor na moeda cotada, sem unidade)
+//   1 — data YY-MM-DD  2 — par  3 — lado  4 — preço  5 — executado  6 — total
 const ROW_PATTERN =
-  /^(\d{2}-\d{2}-\d{2})\s+\d{2}:\d{2}:\d{2}\s+([A-Z0-9]{4,12})\s+(BUY|SELL)\s+([\d.]+)\s+([\d.]+)[A-Z]+\s+([\d.]+)[A-Z]+/i;
+  /(\d{2}-\d{2}-\d{2})\s+\d{2}:\d{2}:\d{2}\s+([A-Z0-9]{4,16})\s+(BUY|SELL)\s+([\d.,]+)\s+([\d.,]+)\s*[A-Z]+\s+([\d.,]+)\s*[A-Z]+/i;
+
+// Normaliza número no formato PT-BR (1.234,56 → 1234.56) ou EN (1234.56 → 1234.56)
+function normalizarNumero(raw: string): number {
+  // Se tem vírgula E ponto: "1.234,56" → remover ponto, trocar vírgula
+  if (raw.includes(",") && raw.includes(".")) {
+    return parseFloat(raw.replace(/\./g, "").replace(",", "."));
+  }
+  // Se só tem vírgula: "1234,56" → "1234.56"
+  if (raw.includes(",")) {
+    return parseFloat(raw.replace(",", "."));
+  }
+  return parseFloat(raw);
+}
 
 export function parseBinancePDF(text: string): Operacao[] {
   const operacoes: Operacao[] = [];
@@ -123,9 +139,9 @@ export function parseBinancePDF(text: string): Operacao[] {
       const moedaCotada = extrairMoedaCotada(pair);
       const isUSD = EXCHANGES_USD.includes(moedaCotada);
 
-      const quantidade = parseFloat(executedRaw) || 0;
-      const valorTotal = parseFloat(amountRaw) || 0;
-      const precoUnitario = parseFloat(priceRaw) || 0;
+      const quantidade    = normalizarNumero(executedRaw);
+      const valorTotal    = normalizarNumero(amountRaw);
+      const precoUnitario = normalizarNumero(priceRaw);
 
       if (quantidade <= 0 || valorTotal <= 0) continue;
 

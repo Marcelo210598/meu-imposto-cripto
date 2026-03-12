@@ -101,7 +101,7 @@ const faqs = [
       {
         pergunta: "Os dados são seguros?",
         resposta:
-          "Sim. Todos os dados são armazenados localmente no seu navegador (localStorage). Não enviamos suas informações para nenhum servidor. Você tem controle total.",
+          "Sim. Quando você está logado, seus dados são salvos com segurança na nuvem (banco de dados criptografado). Usamos HTTPS em todas as comunicações e nunca compartilhamos suas informações com terceiros.",
       },
       {
         pergunta: "Quais exchanges são suportadas?",

@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Fundo circular com gradiente verde -->
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#16a34a"/>
+      <stop offset="100%" stop-color="#15803d"/>
+    </linearGradient>
+    <linearGradient id="glowGrad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#4ade80" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#16a34a" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Fundo -->
+  <circle cx="32" cy="32" r="32" fill="url(#bgGrad)"/>
+  <circle cx="32" cy="32" r="32" fill="url(#glowGrad)"/>
+
+  <!-- Cabeça do robô -->
+  <rect x="16" y="18" width="32" height="26" rx="6" fill="white" fill-opacity="0.15" stroke="white" stroke-opacity="0.9" stroke-width="1.5"/>
+
+  <!-- Olhos (dois círculos com brilho de LED) -->
+  <circle cx="24" cy="30" r="4" fill="white" fill-opacity="0.2"/>
+  <circle cx="24" cy="30" r="2.5" fill="#4ade80"/>
+  <circle cx="23" cy="29" r="0.8" fill="white" fill-opacity="0.8"/>
+
+  <circle cx="40" cy="30" r="4" fill="white" fill-opacity="0.2"/>
+  <circle cx="40" cy="30" r="2.5" fill="#4ade80"/>
+  <circle cx="39" cy="29" r="0.8" fill="white" fill-opacity="0.8"/>
+
+  <!-- Boca / display -->
+  <rect x="22" y="37" width="20" height="3" rx="1.5" fill="white" fill-opacity="0.25"/>
+  <rect x="22" y="37" width="10" height="3" rx="1.5" fill="#4ade80" fill-opacity="0.8"/>
+
+  <!-- Antena -->
+  <line x1="32" y1="18" x2="32" y2="12" stroke="white" stroke-opacity="0.9" stroke-width="1.5" stroke-linecap="round"/>
+  <circle cx="32" cy="10" r="2.5" fill="#4ade80"/>
+  <circle cx="32" cy="10" r="1.2" fill="white"/>
+
+  <!-- Linhas de circuito (lateral esquerda) -->
+  <path d="M16 26 L10 26 L10 32 L13 32" stroke="white" stroke-opacity="0.5" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <circle cx="13" cy="32" r="1.2" fill="#4ade80" fill-opacity="0.8"/>
+
+  <!-- Linhas de circuito (lateral direita) -->
+  <path d="M48 30 L54 30 L54 38 L51 38" stroke="white" stroke-opacity="0.5" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <circle cx="51" cy="38" r="1.2" fill="#4ade80" fill-opacity="0.8"/>
+
+  <!-- Símbolo $ pequeno embaixo da boca (referência ao imposto) -->
+  <text x="32" y="50" text-anchor="middle" font-size="7" font-family="Arial, sans-serif" font-weight="bold" fill="white" fill-opacity="0.7">T$</text>
+</svg>

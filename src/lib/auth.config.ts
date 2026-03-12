@@ -24,16 +24,22 @@ export const authConfig: NextAuthConfig = {
       const isLoggedIn = !!auth?.user;
       const pathname = request.nextUrl.pathname;
 
-      const rotasProtegidas = ["/calculadora", "/relatorio", "/perfil", "/exchanges"];
+      const rotasProtegidas = ["/relatorio", "/perfil", "/exchanges"];
       const isProtected = rotasProtegidas.some((r) => pathname.startsWith(r));
 
       if (isProtected && !isLoggedIn) return false;
       return true;
     },
-    jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id;
-        token.plano = (user as { plano?: string }).plano ?? "gratis";
+        // OAuth: buscar plano do banco na primeira vez (user.plano pode não estar disponível)
+        if (account?.provider === "google") {
+          // plano virá do DB via adapter — usa "gratis" como fallback
+          token.plano = (user as { plano?: string }).plano ?? "gratis";
+        } else {
+          token.plano = (user as { plano?: string }).plano ?? "gratis";
+        }
         // Grava timestamp de emissão para calcular timeout absoluto
         token.issuedAt = Math.floor(Date.now() / 1000);
       }

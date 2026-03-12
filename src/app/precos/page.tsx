@@ -18,11 +18,11 @@ const planos = [
     destaque: false,
     planoKey: null as null,
     features: [
-      "Até 50 operações por ano",
+      "Até 50 operações",
       "Cálculo de preço médio",
       "Resumo mensal de IR",
       "Importação de CSV básica",
-      "Dados salvos localmente",
+      "Dados salvos na nuvem",
     ],
     naoInclui: [
       "Exportação para PDF",
@@ -63,10 +63,9 @@ const planos = [
     features: [
       "Tudo do plano Pro",
       "Suporte prioritário via WhatsApp",
-      "Consultoria mensal de 30 min",
       "Configuração assistida inicial",
       "Acesso antecipado a novas funcionalidades",
-      "Certificado de uso profissional",
+      "Relatórios personalizados para clientes",
     ],
     naoInclui: [],
     cta: "Assinar Contador",
@@ -246,7 +245,7 @@ export default function PrecosPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    O plano grátis permite até 50 operações por ano, suficiente para a maioria dos investidores iniciantes.
+                    O plano grátis permite até 50 operações, suficiente para a maioria dos investidores iniciantes.
                   </p>
                 </CardContent>
               </Card>
