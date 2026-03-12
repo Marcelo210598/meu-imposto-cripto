@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { ArrowRight, Shield, Zap, Calculator } from "lucide-react";
+import { ArrowRight, Shield, Zap, Calculator, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const stats = [
-  { icon: Calculator, value: "R$ 35 mil", label: "Limite de isenção mensal" },
-  { icon: Zap,        value: "15–22,5%",  label: "Alíquotas progressivas"  },
-  { icon: Shield,     value: "100%",       label: "Dados seguros e privados" },
+  { icon: Calculator, value: "R$ 35 mil", label: "Isenção mensal para corretoras brasileiras" },
+  { icon: Zap,        value: "15–22,5%",  label: "Alíquotas progressivas (corretoras BR)"     },
+  { icon: Globe,      value: "15% fixo",  label: "Corretoras estrangeiras (Lei 14.754/2023)"  },
+  { icon: Shield,     value: "100%",      label: "Dados seguros e privados"                   },
 ];
 
 export function Hero() {
@@ -61,7 +62,7 @@ export function Hero() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-2xl mx-auto animate-fade-in-up delay-400">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-3xl mx-auto animate-fade-in-up delay-400">
             {stats.map((stat, i) => (
               <div key={i} className="flex flex-col items-center group cursor-default">
                 <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-primary/10 mb-3 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-200 group-hover:shadow-md group-hover:shadow-primary/20">

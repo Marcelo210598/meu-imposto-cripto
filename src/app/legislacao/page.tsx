@@ -211,8 +211,28 @@ export default function LegislacaoPage() {
           </div>
         </section>
 
+        {/* Banner MP 1.303/2025 */}
+        <section className="py-5 px-4 bg-blue-50 dark:bg-blue-950/30 border-y border-blue-200 dark:border-blue-800">
+          <div className="container mx-auto max-w-4xl">
+            <div className="flex items-start gap-3">
+              <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-blue-800 dark:text-blue-200">
+                  Atenção: MP 1.303/2025 — ainda não está em vigor
+                </p>
+                <p className="text-sm text-blue-700 dark:text-blue-300 mt-0.5">
+                  O governo federal publicou a MP 1.303/2025 propondo mudanças como fim da isenção de R$ 35.000
+                  e alíquota única de 17,5% para criptoativos. Essa medida ainda não está em vigor.
+                  As regras atuais continuam válidas para 2026.
+                  Acompanharemos e atualizaremos a ferramenta caso a MP seja aprovada pelo Congresso Nacional.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Aviso importante */}
-        <section className="py-6 px-4 bg-amber-50 dark:bg-amber-950/30 border-y border-amber-200 dark:border-amber-800">
+        <section className="py-6 px-4 bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-800">
           <div className="container mx-auto max-w-4xl">
             <div className="flex items-start gap-3">
               <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />

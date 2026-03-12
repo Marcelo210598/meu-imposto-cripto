@@ -5,6 +5,7 @@ import { registerSchema } from "@/lib/schemas";
 import { rateLimit, getIp } from "@/lib/rate-limit";
 import { verifyCsrf, csrfError } from "@/lib/csrf";
 import { auditLog } from "@/lib/audit";
+import { sendWelcomeEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   if (!verifyCsrf(req)) return csrfError();
@@ -54,6 +55,9 @@ export async function POST(req: NextRequest) {
     });
 
     await auditLog({ action: "register", userId: user.id, ip });
+
+    // Email de boas-vindas — fire-and-forget, não bloqueia a resposta
+    sendWelcomeEmail(user.email!, user.name ?? "").catch(() => {});
 
     return NextResponse.json({ user }, { status: 201 });
   } catch (error) {

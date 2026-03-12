@@ -4,8 +4,7 @@ import { auth } from "@/lib/auth";
 // Força execução no servidor de São Paulo — Binance bloqueia IPs dos EUA
 export const preferredRegion = ["gru1"];
 import { prisma } from "@/lib/db";
-import { encrypt, decrypt } from "@/lib/encryption";
-import { testarConexaoBinance } from "@/lib/exchanges/binance";
+import { encrypt } from "@/lib/encryption";
 import { rateLimit } from "@/lib/rate-limit";
 import { verifyCsrf, csrfError } from "@/lib/csrf";
 import { z } from "zod";
@@ -72,19 +71,8 @@ export async function POST(req: NextRequest) {
   const { exchange, apiKey, apiSecret, label } = parsed.data;
   const userId = session.user.id as string;
 
-  // Testa a conexão antes de salvar
-  let testeOk: { ok: boolean; erro?: string };
-  if (exchange === "binance") {
-    testeOk = await testarConexaoBinance(apiKey, apiSecret);
-  } else {
-    testeOk = { ok: false, erro: "Exchange não suportada" };
-  }
-
-  if (!testeOk.ok) {
-    return NextResponse.json(
-      { error: testeOk.erro ?? "Falha ao conectar com a exchange" },
-      { status: 400 }
-    );
+  if (!["binance"].includes(exchange)) {
+    return NextResponse.json({ error: "Exchange não suportada" }, { status: 400 });
   }
 
   // Verifica se já existe conexão para essa exchange

@@ -8,8 +8,12 @@ import { toast } from "sonner";
 import {
   ArrowLeft, Link2, Link2Off, RefreshCw, Trash2, Plus,
   CheckCircle2, AlertCircle, Loader2, ExternalLink, Shield,
-  Clock, BarChart2, Monitor,
+  Clock, BarChart2, Monitor, Wifi,
 } from "lucide-react";
+import {
+  testarConexaoBinanceBrowser,
+  sincronizarBinanceBrowser,
+} from "@/lib/exchanges/binance-browser";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -71,6 +75,7 @@ export default function ExchangesPage() {
   const [conexoes, setConexoes] = useState<ExchangeConnection[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState<string | null>(null);
+  const [syncProgress, setSyncProgress] = useState<string>("");
   const [removendo, setRemovendo] = useState<string | null>(null);
   const [syncResult, setSyncResult] = useState<SyncResult | null>(null);
 
@@ -81,6 +86,7 @@ export default function ExchangesPage() {
   const [apiSecret, setApiSecret] = useState("");
   const [label, setLabel] = useState("");
   const [conectando, setConectando] = useState(false);
+  const [conectandoStatus, setConectandoStatus] = useState<"idle" | "testando" | "salvando">("idle");
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login?callbackUrl=/exchanges");
@@ -111,6 +117,16 @@ export default function ExchangesPage() {
     }
     setConectando(true);
     try {
+      // 1. Testa a conexão diretamente do browser (IP residencial do usuário)
+      setConectandoStatus("testando");
+      const teste = await testarConexaoBinanceBrowser(apiKey.trim(), apiSecret.trim());
+      if (!teste.ok) {
+        toast.error(teste.erro ?? "Não foi possível conectar à Binance. Verifique as chaves.");
+        return;
+      }
+
+      // 2. Salva as credenciais criptografadas no servidor
+      setConectandoStatus("salvando");
       const res = await fetch("/api/exchanges", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -124,7 +140,7 @@ export default function ExchangesPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        toast.error(data.error ?? "Erro ao conectar exchange");
+        toast.error(data.error ?? "Erro ao salvar credenciais");
         return;
       }
 
@@ -138,23 +154,46 @@ export default function ExchangesPage() {
       toast.error("Erro de conexão. Tente novamente.");
     } finally {
       setConectando(false);
+      setConectandoStatus("idle");
     }
   };
 
-  // ─── sincronizar ────────────────────────────────────────────────────────────
+  // ─── sincronizar (browser-side para evitar bloqueio de IP da Binance) ───────
 
   const handleSync = async (conexao: ExchangeConnection) => {
     setSyncing(conexao.id);
+    setSyncProgress("");
     setSyncResult(null);
     try {
-      const res = await fetch(`/api/exchanges/${conexao.id}/sync`, {
+      // 1. Busca credenciais descriptografadas do servidor
+      setSyncProgress("Buscando credenciais...");
+      const credRes = await fetch(`/api/exchanges/${conexao.id}/credentials`);
+      if (!credRes.ok) {
+        toast.error("Erro ao buscar credenciais. Reconecte a exchange.");
+        return;
+      }
+      const { apiKey: key, apiSecret: secret } = await credRes.json();
+
+      // 2. Chama a Binance diretamente do browser (IP do usuário — sem bloqueio)
+      setSyncProgress("Conectando à Binance...");
+      const { operacoes, paresComTrades } = await sincronizarBinanceBrowser(
+        key,
+        secret,
+        (par, total) => setSyncProgress(`Buscando ${par}… (${total} trades encontrados)`)
+      );
+
+      setSyncProgress("Salvando operações...");
+
+      // 3. Envia as operações ao servidor para salvar
+      const importRes = await fetch(`/api/exchanges/${conexao.id}/import`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ operacoes, paresComTrades }),
       });
 
-      const data = await res.json();
+      const data = await importRes.json();
 
-      if (res.status === 403 && data.upgrade) {
+      if (importRes.status === 403 && data.upgrade) {
         toast.error(data.error, {
           action: { label: "Ver planos", onClick: () => router.push("/precos") },
           duration: 8000,
@@ -162,8 +201,8 @@ export default function ExchangesPage() {
         return;
       }
 
-      if (!res.ok) {
-        toast.error(data.error ?? "Erro ao sincronizar");
+      if (!importRes.ok) {
+        toast.error(data.error ?? "Erro ao salvar operações");
         return;
       }
 
@@ -175,10 +214,12 @@ export default function ExchangesPage() {
       } else {
         toast.info("Nenhuma operação nova encontrada.");
       }
-    } catch {
-      toast.error("Erro de conexão ao sincronizar.");
+    } catch (err) {
+      console.error("Sync error:", err);
+      toast.error("Erro durante a sincronização. Verifique sua conexão.");
     } finally {
       setSyncing(null);
+      setSyncProgress("");
     }
   };
 
@@ -288,9 +329,10 @@ export default function ExchangesPage() {
                             size="sm"
                             onClick={() => handleSync(conexao)}
                             disabled={isSyncing}
+                            title={isSyncing && syncProgress ? syncProgress : undefined}
                           >
                             {isSyncing ? (
-                              <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Sincronizando...</>
+                              <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{syncProgress ? "Sincronizando..." : "Sincronizando..."}</>
                             ) : (
                               <><RefreshCw className="h-4 w-4 mr-2" />Sincronizar</>
                             )}
@@ -343,8 +385,18 @@ export default function ExchangesPage() {
                   </CardContent>
                 )}
 
+                {/* Progresso do sync */}
+                {isSyncing && syncProgress && (
+                  <CardContent className="pt-0">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin flex-shrink-0" />
+                      <span className="truncate">{syncProgress}</span>
+                    </div>
+                  </CardContent>
+                )}
+
                 {/* Info da conexão ativa */}
-                {conexao && (
+                {conexao && !isSyncing && (
                   <CardContent className="pt-0 space-y-3">
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div className="p-3 rounded-lg bg-background border">
@@ -550,8 +602,10 @@ export default function ExchangesPage() {
               Cancelar
             </Button>
             <Button onClick={handleConectar} disabled={conectando}>
-              {conectando ? (
-                <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Verificando...</>
+              {conectandoStatus === "testando" ? (
+                <><Wifi className="h-4 w-4 mr-2 animate-pulse" />Testando conexão...</>
+              ) : conectandoStatus === "salvando" ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Salvando...</>
               ) : (
                 <><Link2 className="h-4 w-4 mr-2" />Conectar</>
               )}

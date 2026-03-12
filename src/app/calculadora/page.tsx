@@ -82,6 +82,7 @@ export default function CalculadoraPage() {
   const [confirmLimparOpen, setConfirmLimparOpen] = useState(false);
   const [limpando, setLimpando] = useState(false);
   const [bannerMPFechado, setBannerMPFechado] = useState(false);
+  const [showBinanceModal, setShowBinanceModal] = useState(false);
 
   // --- Carregar operações ---
   const carregarDados = useCallback(async () => {
@@ -362,6 +363,57 @@ export default function CalculadoraPage() {
 
   return (
     <div className="min-h-screen bg-muted/30">
+      {/* Dialog — Binance ambígua */}
+      <Dialog open={showBinanceModal} onOpenChange={setShowBinanceModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-amber-500" />
+              Qual Binance você utilizou?
+            </DialogTitle>
+            <DialogDescription className="pt-2 text-left space-y-2">
+              <span className="block">
+                A Binance possui <strong>duas operações distintas no Brasil</strong>, com regimes tributários diferentes:
+              </span>
+              <span className="block pl-2 border-l-2 border-green-400 text-xs">
+                <strong>Binance Brasil (Capitual/Latam)</strong> — possui CNPJ no Brasil.
+                Aplica-se isenção de R$35k/mês e DARF mensal.
+              </span>
+              <span className="block pl-2 border-l-2 border-purple-400 text-xs">
+                <strong>Binance Global (binance.com)</strong> — sem CNPJ no Brasil.
+                15% flat sobre lucro anual, sem isenção (Lei 14.754/2023).
+              </span>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              className="border-green-500 text-green-700 hover:bg-green-50 dark:hover:bg-green-950/30"
+              onClick={() => {
+                setNovaOperacao((prev) => ({ ...prev, tipoExchange: "nacional" }));
+                setFormErrors((prev) => ({ ...prev, tipoExchange: undefined }));
+                setShowBinanceModal(false);
+              }}
+            >
+              <Building2 className="h-4 w-4 mr-2" />
+              Binance Brasil
+            </Button>
+            <Button
+              variant="outline"
+              className="border-purple-500 text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-950/30"
+              onClick={() => {
+                setNovaOperacao((prev) => ({ ...prev, tipoExchange: "estrangeira" }));
+                setFormErrors((prev) => ({ ...prev, tipoExchange: undefined }));
+                setShowBinanceModal(false);
+              }}
+            >
+              <Globe className="h-4 w-4 mr-2" />
+              Binance Global
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Dialog — limpar tudo */}
       <Dialog open={confirmLimparOpen} onOpenChange={setConfirmLimparOpen}>
         <DialogContent>
@@ -538,7 +590,16 @@ export default function CalculadoraPage() {
                 <strong>
                   {new Date(alertaExteriorMes[0] + "-15").toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}
                 </strong>.
-                {" "}Por superar R$ 30.000, você deve reportar via e-CAC até o último dia do mês seguinte.
+                {" "}Por superar R$ 30.000, você deve reportar via{" "}
+                <a
+                  href="https://cav.receita.fazenda.gov.br"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline font-medium hover:text-orange-900 dark:hover:text-orange-200"
+                >
+                  e-CAC
+                </a>{" "}
+                até o último dia do mês seguinte (IN 1.888/2019).
               </p>
             </div>
           </div>
@@ -580,6 +641,23 @@ export default function CalculadoraPage() {
             <div className="text-right text-xs text-muted-foreground hidden sm:block">
               <p>15% flat · apuração anual</p>
               <p>Lei 14.754/2023</p>
+            </div>
+          </div>
+        )}
+
+        {/* Alerta DeCripto — IN 2.291/2025 */}
+        {temOperacoesExterior && (
+          <div className="mb-6 p-4 rounded-xl bg-blue-500/5 border border-blue-500/20 flex items-start gap-3 animate-fade-in">
+            <Info className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-medium text-sm text-blue-800 dark:text-blue-300">
+                Nova obrigação — DeCripto a partir de 01/07/2026
+              </p>
+              <p className="text-xs text-blue-700 dark:text-blue-400 mt-0.5">
+                A partir de julho de 2026, o reporte de operações em exchanges estrangeiras passará a ser feito
+                pela <strong>DeCripto</strong> (Declaração de Criptoativos no Exterior), conforme{" "}
+                <strong>IN RFB 2.291/2025</strong>. Até lá, continuam válidas as regras atuais de reporte via e-CAC (IN 1.888/2019).
+              </p>
             </div>
           </div>
         )}
@@ -726,9 +804,13 @@ export default function CalculadoraPage() {
                         id="exchange"
                         placeholder="Ex: Binance, Bybit, Mercado Bitcoin..."
                         value={novaOperacao.exchange}
-                        onChange={(e) =>
-                          setNovaOperacao({ ...novaOperacao, exchange: e.target.value })
-                        }
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setNovaOperacao((prev) => ({ ...prev, exchange: val }));
+                          if (val.toLowerCase().includes("binance")) {
+                            setShowBinanceModal(true);
+                          }
+                        }}
                       />
                     </div>
 

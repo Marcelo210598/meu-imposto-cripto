@@ -41,7 +41,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self'",
-      "connect-src 'self' https://olinda.bcb.gov.br https://plausible.io https://www.google-analytics.com https://analytics.google.com",
+      "connect-src 'self' https://olinda.bcb.gov.br https://plausible.io https://www.google-analytics.com https://analytics.google.com wss://ws-api.binance.com:443 wss://ws-api.binance.com:9443",
       "frame-src 'none'",
       "frame-ancestors 'none'",
       "object-src 'none'",
