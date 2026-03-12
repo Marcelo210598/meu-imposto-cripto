@@ -1,14 +1,19 @@
 import { Star } from "lucide-react";
 
-const exchanges = [
-  { name: "Binance", color: "#F0B90B" },
+const exchangesNacionais = [
   { name: "Mercado Bitcoin", color: "#F26522" },
+  { name: "Foxbit", color: "#1DA462" },
+  { name: "NovaDAX", color: "#E31837" },
+  { name: "Coinext", color: "#2563EB" },
+  { name: "BitPreço", color: "#0EA5E9" },
+];
+
+const exchangesEstrangeiras = [
+  { name: "Binance", color: "#F0B90B" },
   { name: "Bybit", color: "#F7A600" },
   { name: "Coinbase", color: "#0052FF" },
   { name: "Kraken", color: "#5741D9" },
   { name: "OKX", color: "#000000" },
-  { name: "Foxbit", color: "#1DA462" },
-  { name: "NovaDAX", color: "#E31837" },
 ];
 
 const depoimentos: { nome: string; cargo: string; texto: string; estrelas: number }[] = [];
@@ -47,10 +52,27 @@ export function SocialProof() {
           <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-6">
             Compatível com as principais exchanges
           </p>
-          <div className="flex flex-wrap justify-center gap-3">
-            {exchanges.map((ex) => (
-              <ExchangeLogo key={ex.name} {...ex} />
-            ))}
+          <div className="space-y-4">
+            <div>
+              <p className="text-xs font-semibold text-green-700 dark:text-green-400 uppercase tracking-wider mb-3">
+                Corretoras Brasileiras — regime nacional (isenção R$ 35k + DARF mensal)
+              </p>
+              <div className="flex flex-wrap justify-center gap-3">
+                {exchangesNacionais.map((ex) => (
+                  <ExchangeLogo key={ex.name} {...ex} />
+                ))}
+              </div>
+            </div>
+            <div className="pt-2">
+              <p className="text-xs font-semibold text-purple-700 dark:text-purple-400 uppercase tracking-wider mb-3">
+                Corretoras Internacionais — regime exterior (15% flat · Lei 14.754/2023)
+              </p>
+              <div className="flex flex-wrap justify-center gap-3">
+                {exchangesEstrangeiras.map((ex) => (
+                  <ExchangeLogo key={ex.name} {...ex} />
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 

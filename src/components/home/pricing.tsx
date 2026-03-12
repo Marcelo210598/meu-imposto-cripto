@@ -16,7 +16,7 @@ const planos = [
     features: [
       "Até 50 operações",
       "Cálculo de preço médio",
-      "Resumo mensal de IR",
+      "Resumo de IR por regime (mensal ou anual)",
       "Importação de CSV básica",
       "Dados salvos na nuvem",
     ],
@@ -33,7 +33,7 @@ const planos = [
     features: [
       "Operações ilimitadas",
       "Cálculo de preço médio",
-      "Resumo mensal de IR",
+      "Resumo de IR por regime (mensal ou anual)",
       "Importação de todas as exchanges",
       "Exportação para PDF",
       "Relatório para GCAP",

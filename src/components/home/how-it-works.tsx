@@ -31,9 +31,9 @@ const steps = [
   {
     number: "04",
     icon: Send,
-    title: "Exporte para o GCAP",
+    title: "Exporte o relatório",
     description:
-      "Baixe o relatório no formato aceito pelo programa GCAP da Receita Federal ou envie para seu contador.",
+      "Para exchanges brasileiras: exporte no formato GCAP da Receita Federal e gere o DARF mensal. Para exchanges estrangeiras: gere o relatório anual para preenchimento da Declaração de Ajuste Anual do IRPF.",
     gradient: "from-orange-500 to-amber-600",
     shadow: "shadow-orange-500/30",
   },

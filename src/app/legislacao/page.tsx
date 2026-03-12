@@ -61,18 +61,18 @@ const regras = [
     icon: CheckCircle,
     cor: "text-green-600",
     bg: "bg-green-50 dark:bg-green-950",
-    titulo: "Isenção de R$ 35.000/mês",
+    titulo: "Isenção de R$ 35.000/mês — regime nacional",
     descricao:
-      "Se o total de vendas de criptoativos no mês for igual ou inferior a R$ 35.000, o ganho é isento de IR. Atenção: o critério é o valor total vendido no mês, não o lucro.",
-    detalhe: "Base legal: Lei 9.250/1995 c/c Art. 22 da Lei 9.532/1997",
+      "Se o total de vendas de criptoativos no mês for igual ou inferior a R$ 35.000, o ganho é isento de IR. Atenção: o critério é o valor total vendido no mês, não o lucro. ⚠️ Esta isenção aplica-se exclusivamente a operações em exchanges com CNPJ brasileiro (Mercado Bitcoin, Foxbit, NovaDAX etc.). Exchanges estrangeiras (Binance global, Bybit, Coinbase, Kraken etc.) seguem a Lei 14.754/2023 e não possuem faixa de isenção — qualquer lucro é tributado.",
+    detalhe: "Base legal: Lei 9.250/1995 c/c Art. 22 da Lei 9.532/1997 — aplica-se apenas ao regime nacional",
   },
   {
     icon: TrendingUp,
     cor: "text-amber-600",
     bg: "bg-amber-50 dark:bg-amber-950",
-    titulo: "Alíquotas progressivas de ganho de capital",
+    titulo: "Alíquotas progressivas — regime nacional",
     descricao:
-      "Quando as vendas mensais superam R$ 35.000, incide IR sobre o ganho de capital (receita de venda menos custo de aquisição). As alíquotas são progressivas.",
+      "Quando as vendas mensais superam R$ 35.000 em exchanges brasileiras, incide IR sobre o ganho de capital (receita de venda menos custo de aquisição). As alíquotas são progressivas. Day trade de criptoativos usa essa mesma tabela progressiva (não é 20% fixo, que se aplica apenas a day trade na bolsa de valores).",
     detalhe: "Base legal: Lei 13.259/2016",
     tabela: [
       { faixa: "Até R$ 5.000.000", aliquota: "15%" },
@@ -85,10 +85,10 @@ const regras = [
     icon: Clock,
     cor: "text-blue-600",
     bg: "bg-blue-50 dark:bg-blue-950",
-    titulo: "Prazo de pagamento — DARF",
+    titulo: "Prazo de pagamento — DARF (regime nacional)",
     descricao:
-      "O imposto deve ser recolhido via DARF (Documento de Arrecadação de Receitas Federais) até o último dia útil do mês seguinte ao da operação.",
-    detalhe: "Código DARF para ganho de capital: 4600",
+      "Para exchanges com CNPJ no Brasil: o imposto deve ser recolhido via DARF até o último dia útil do mês seguinte ao da operação. Para exchanges estrangeiras (Lei 14.754/2023): não há DARF mensal — o imposto é calculado sobre o lucro líquido anual e pago na Declaração de Ajuste Anual do IRPF.",
+    detalhe: "Código DARF para ganho de capital: 4600 (aplica-se ao regime nacional)",
   },
   {
     icon: FileText,

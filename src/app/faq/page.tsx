@@ -21,17 +21,17 @@ const faqs = [
       {
         pergunta: "Quando devo pagar imposto sobre criptomoedas?",
         resposta:
-          "Você deve pagar imposto quando vender criptomoedas com lucro E o total de vendas no mês ultrapassar R$ 35.000. Se suas vendas ficarem abaixo desse limite, você está isento, mesmo tendo lucro.",
+          "Depende de onde você opera. Para exchanges com CNPJ no Brasil (regime nacional): você paga imposto quando vender com lucro E o total de vendas no mês ultrapassar R$ 35.000 — abaixo disso, está isento. Para exchanges sem CNPJ no Brasil como Binance global, Bybit, Coinbase e Kraken (regime exterior, Lei 14.754/2023): não existe faixa de isenção. Qualquer lucro é tributado à alíquota de 15% sobre o resultado líquido anual, pago na declaração anual — não via DARF mensal.",
       },
       {
         pergunta: "Qual é a alíquota do imposto sobre criptomoedas?",
         resposta:
-          "A alíquota varia de acordo com o valor do ganho de capital: 15% para ganhos até R$ 5 milhões, 17,5% de R$ 5 a 10 milhões, 20% de R$ 10 a 30 milhões, e 22,5% acima de R$ 30 milhões.",
+          "Depende do regime. Para exchanges brasileiras (regime nacional): alíquotas progressivas de 15% para ganhos até R$ 5 milhões, 17,5% de R$ 5M a R$ 10M, 20% de R$ 10M a R$ 30M, e 22,5% acima de R$ 30M. Day trade de criptoativos usa essa mesma tabela progressiva — a alíquota de 20% fixo para day trade se aplica apenas à bolsa de valores, nunca a cripto. Para exchanges estrangeiras (regime exterior, Lei 14.754/2023): alíquota fixa de 15% sobre o lucro líquido anual, sem tabela progressiva e sem isenção.",
       },
       {
         pergunta: "O que é o limite de isenção de R$ 35.000?",
         resposta:
-          "Se o total das suas vendas de criptomoedas em um mês for igual ou inferior a R$ 35.000, você está isento de pagar imposto sobre o ganho de capital, independentemente do lucro obtido.",
+          "Se o total das suas vendas de criptomoedas em um mês for igual ou inferior a R$ 35.000, você está isento de pagar imposto sobre o ganho de capital, independentemente do lucro obtido. Atenção: essa isenção se aplica exclusivamente a operações em exchanges com CNPJ no Brasil (regime nacional), como Mercado Bitcoin, Foxbit e NovaDAX. Para exchanges estrangeiras como Coinbase, Kraken, Bybit e a Binance global, não existe faixa de isenção — qualquer lucro é tributado à alíquota de 15%.",
       },
       {
         pergunta: "Troca de uma cripto por outra é tributável?",
@@ -76,12 +76,12 @@ const faqs = [
       {
         pergunta: "Qual o prazo para pagar o imposto?",
         resposta:
-          "O imposto (DARF) deve ser pago até o último dia útil do mês seguinte à venda. Exemplo: vendeu em janeiro com lucro tributável, pague até o último dia útil de fevereiro.",
+          "Depende do regime. Para exchanges brasileiras (regime nacional): o imposto via DARF deve ser pago até o último dia útil do mês seguinte à venda. Exemplo: vendeu em janeiro com lucro tributável, pague até o último dia útil de fevereiro. Para exchanges estrangeiras (regime exterior, Lei 14.754/2023): não há DARF mensal. O imposto é calculado sobre o lucro líquido anual e pago na Declaração de Ajuste Anual do IRPF, com vencimento no prazo normal da declaração (geralmente abril/maio do ano seguinte).",
       },
       {
         pergunta: "O que é DARF e como emitir?",
         resposta:
-          "DARF é o Documento de Arrecadação de Receitas Federais. Você emite pelo site da Receita Federal (Sicalc) ou pelo programa GCAP. O código é 4600 para ganho de capital de pessoa física.",
+          "DARF é o Documento de Arrecadação de Receitas Federais, usado para pagar imposto sobre ganho de capital no regime nacional (exchanges com CNPJ no Brasil). Você emite pelo site da Receita Federal (Sicalc) ou pelo programa GCAP. O código é 4600 para ganho de capital de pessoa física. Atenção: operações em exchanges estrangeiras (Lei 14.754/2023) não geram DARF mensal — o imposto é pago na declaração anual.",
       },
       {
         pergunta: "O que é o GCAP?",
