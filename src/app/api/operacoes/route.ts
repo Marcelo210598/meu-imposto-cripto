@@ -27,6 +27,7 @@ export async function GET() {
       precoUnitario: op.precoUnitario,
       data: op.data.toISOString().split("T")[0],
       exchange: op.exchange ?? undefined,
+      tipoExchange: (op.tipoExchange as "nacional" | "estrangeira") ?? undefined,
     }))
   );
 }
@@ -93,6 +94,7 @@ export async function POST(req: NextRequest) {
           precoUnitario: op.precoUnitario,
           data: new Date(op.data),
           exchange: op.exchange ?? null,
+          tipoExchange: op.tipoExchange ?? null,
         },
       })
     )
@@ -108,6 +110,7 @@ export async function POST(req: NextRequest) {
       precoUnitario: op.precoUnitario,
       data: op.data.toISOString().split("T")[0],
       exchange: op.exchange ?? undefined,
+      tipoExchange: (op.tipoExchange as "nacional" | "estrangeira") ?? undefined,
     })),
     { status: 201 }
   );

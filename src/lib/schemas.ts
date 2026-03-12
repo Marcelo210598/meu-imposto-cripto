@@ -26,6 +26,7 @@ export const operacaoSchema = z.object({
     .regex(/^\d{4}-\d{2}-\d{2}$/, "Data inválida, use YYYY-MM-DD")
     .refine((d) => !isNaN(Date.parse(d)), "Data inválida"),
   exchange: sanitizedString(100).optional(),
+  tipoExchange: z.enum(["nacional", "estrangeira"]).optional(),
 });
 
 export type OperacaoInput = z.infer<typeof operacaoSchema>;

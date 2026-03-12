@@ -75,6 +75,7 @@ model Operacao {
   precoUnitario Float
   data          DateTime
   exchange      String?
+  tipoExchange  String?  // "nacional" | "estrangeira" — regime tributário (Lei 14.754/2023)
   createdAt     DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

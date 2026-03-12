@@ -7,7 +7,8 @@ import { toast } from "sonner";
 import {
   ArrowLeft, Plus, TrendingUp, TrendingDown, DollarSign,
   AlertCircle, Trash2, AlertTriangle, CheckCircle, FileDown,
-  CloudUpload, Lock, FileText, Search, X, BarChart2, Activity, Link2,
+  CloudUpload, Lock, FileText, Search, X, BarChart2, Activity,
+  Link2, Globe, Building2, Info,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,9 +19,13 @@ import {
   DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { formatCurrency, formatCrypto } from "@/lib/utils";
-import { Operacao, LIMITE_ISENCAO_MENSAL } from "@/lib/types";
+import { Operacao, LIMITE_ISENCAO_MENSAL, LIMITE_REPORTE_EXTERIOR } from "@/lib/types";
 import { salvarOperacoes, carregarOperacoes, limparOperacoes } from "@/lib/storage";
-import { calcularResumoGeral, calcularResumosMensais } from "@/lib/calculadora";
+import {
+  calcularResumoGeral,
+  calcularResumosMensais,
+  calcularResumosAnuaisExterior,
+} from "@/lib/calculadora";
 import { UploadCSV } from "@/components/calculadora/upload-csv";
 import { PortfolioCard } from "@/components/calculadora/portfolio-card";
 import { DarfModal } from "@/components/calculadora/darf-modal";
@@ -51,6 +56,7 @@ interface FormErrors {
   quantidade?: string;
   valorTotal?: string;
   data?: string;
+  tipoExchange?: string;
 }
 
 export default function CalculadoraPage() {
@@ -66,6 +72,8 @@ export default function CalculadoraPage() {
     quantidade: "",
     valorTotal: "",
     data: new Date().toISOString().split("T")[0],
+    exchange: "",
+    tipoExchange: "" as "" | "nacional" | "estrangeira",
   });
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
@@ -73,6 +81,7 @@ export default function CalculadoraPage() {
   const [busca, setBusca] = useState("");
   const [confirmLimparOpen, setConfirmLimparOpen] = useState(false);
   const [limpando, setLimpando] = useState(false);
+  const [bannerMPFechado, setBannerMPFechado] = useState(false);
 
   // --- Carregar operações ---
   const carregarDados = useCallback(async () => {
@@ -128,6 +137,9 @@ export default function CalculadoraPage() {
 
     if (!novaOperacao.data) errors.data = "Informe a data";
 
+    if (!novaOperacao.tipoExchange)
+      errors.tipoExchange = "Selecione o tipo de corretora";
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -151,6 +163,8 @@ export default function CalculadoraPage() {
       valorTotal,
       precoUnitario: valorTotal / quantidade,
       data: novaOperacao.data,
+      exchange: novaOperacao.exchange.trim() || undefined,
+      tipoExchange: novaOperacao.tipoExchange as "nacional" | "estrangeira",
     };
 
     if (isLoggedIn) {
@@ -192,6 +206,7 @@ export default function CalculadoraPage() {
       tipo: "compra", cripto: "BTC", criptoCustom: "",
       quantidade: "", valorTotal: "",
       data: new Date().toISOString().split("T")[0],
+      exchange: "", tipoExchange: "",
     });
     setFormErrors({});
     setMostrarFormulario(false);
@@ -266,12 +281,38 @@ export default function CalculadoraPage() {
     }
   };
 
-  const resumoGeral = calcularResumoGeral(operacoes);
-  const resumosMensais = calcularResumosMensais(operacoes);
+  const resumoGeral            = calcularResumoGeral(operacoes);
+  const resumosMensais         = calcularResumosMensais(operacoes);
+  const resumosAnuaisExterior  = calcularResumosAnuaisExterior(operacoes);
+  const temOperacoesExterior   = resumosAnuaisExterior.length > 0;
+
   const mesAtual = new Date().toISOString().substring(0, 7);
   const resumoMesAtual = resumosMensais.find((r) => r.mes === mesAtual) || {
     totalVendas: 0, lucroTotal: 0, impostoDevido: 0, isento: true,
+    temDayTrade: false, prejuizoCompensado: 0,
   };
+
+  // Alerta R$30k: calcula total de vendas em exchanges estrangeiras por mês
+  const alertaExteriorMes = (() => {
+    const mesesExterior = new Map<string, number>();
+    for (const op of operacoes) {
+      if (op.tipo !== "venda") continue;
+      const regime = op.tipoExchange ?? (
+        op.exchange?.toLowerCase().includes("binance") ||
+        ["bybit","coinbase","kraken","okx","kucoin","gate.io","mexc","bitget","bingx","gemini","htx","huobi","nexo","deribit","poloniex"].some(
+          e => op.exchange?.toLowerCase().includes(e)
+        ) ? "estrangeira" : "nacional"
+      );
+      if (regime !== "estrangeira") continue;
+      const mes = op.data.substring(0, 7);
+      mesesExterior.set(mes, (mesesExterior.get(mes) ?? 0) + op.valorTotal);
+    }
+    // Retorna o mês mais recente que ultrapassou R$30k
+    const mesesAcima = Array.from(mesesExterior.entries())
+      .filter(([, total]) => total > LIMITE_REPORTE_EXTERIOR)
+      .sort((a, b) => b[0].localeCompare(a[0]));
+    return mesesAcima[0] ?? null;
+  })();
 
   const atingiuLimite = !isLoggedIn && operacoes.length >= LIMITE_FREE;
 
@@ -284,7 +325,6 @@ export default function CalculadoraPage() {
       )
     : operacoes;
 
-  // Summary cards data
   const summaryCards = [
     {
       label: "Total Operações",
@@ -311,7 +351,7 @@ export default function CalculadoraPage() {
       valueColor: resumoGeral.lucroAcumulado >= 0 ? "text-green-600" : "text-destructive",
     },
     {
-      label: "Imposto Total Devido",
+      label: temOperacoesExterior ? "Imposto BR (mensal)" : "Imposto Total Devido",
       value: formatCurrency(resumoGeral.impostoTotalDevido),
       icon: DollarSign,
       bg: "bg-primary/10",
@@ -411,7 +451,32 @@ export default function CalculadoraPage() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        {/* Banner: usuário free logado — uso de operações */}
+
+        {/* Banner MP 1.303/2025 */}
+        {!bannerMPFechado && (
+          <div className="mb-4 p-4 rounded-xl bg-blue-500/5 border border-blue-500/20 flex items-start justify-between gap-4 animate-fade-in">
+            <div className="flex items-start gap-3 flex-1 min-w-0">
+              <Info className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium text-sm text-blue-800 dark:text-blue-300">
+                  MP 1.303/2025 — ainda não está em vigor
+                </p>
+                <p className="text-xs text-blue-700 dark:text-blue-400 mt-0.5">
+                  A Medida Provisória propôs fim da isenção de R$35k e alíquota única de 17,5%, mas não foi aprovada.
+                  As regras atuais (isenção R$35k + progressiva 15-22,5%) continuam válidas para 2026.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setBannerMPFechado(true)}
+              className="text-blue-400 hover:text-blue-600 transition-colors flex-shrink-0 mt-0.5"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
+        {/* Banner: usuário free logado */}
         {isLoggedIn && (session?.user as { plano?: string })?.plano === "gratis" && status !== "loading" && (
           <div className="mb-4 p-4 rounded-xl bg-amber-500/5 border border-amber-500/20 flex items-center justify-between gap-4 flex-wrap animate-fade-in">
             <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -459,6 +524,26 @@ export default function CalculadoraPage() {
           </div>
         )}
 
+        {/* Alerta R$30k exchanges estrangeiras */}
+        {alertaExteriorMes && (
+          <div className="mb-4 p-4 rounded-xl bg-orange-500/5 border border-orange-500/20 flex items-start gap-3 animate-fade-in">
+            <AlertTriangle className="h-5 w-5 text-orange-500 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-medium text-sm text-orange-800 dark:text-orange-300">
+                Obrigação acessória — exchanges estrangeiras
+              </p>
+              <p className="text-xs text-orange-700 dark:text-orange-400 mt-0.5">
+                Você movimentou{" "}
+                <strong>{formatCurrency(alertaExteriorMes[1])}</strong> em exchanges estrangeiras em{" "}
+                <strong>
+                  {new Date(alertaExteriorMes[0] + "-15").toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}
+                </strong>.
+                {" "}Por superar R$ 30.000, você deve reportar via e-CAC até o último dia do mês seguinte.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Cards de Resumo */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {summaryCards.map((card, i) => (
@@ -479,6 +564,25 @@ export default function CalculadoraPage() {
             </Card>
           ))}
         </div>
+
+        {/* Card extra: imposto exterior, se houver */}
+        {temOperacoesExterior && resumoGeral.impostoTotalExterior > 0 && (
+          <div className="mb-6 p-4 rounded-xl bg-purple-500/5 border border-purple-500/20 flex items-center gap-4 animate-fade-in">
+            <div className="h-10 w-10 rounded-xl bg-purple-500/10 flex items-center justify-center flex-shrink-0">
+              <Globe className="h-5 w-5 text-purple-600" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm text-muted-foreground">Imposto Estimado — Exchanges Estrangeiras</p>
+              <p className="text-2xl font-bold text-purple-600">
+                {formatCurrency(resumoGeral.impostoTotalExterior)}
+              </p>
+            </div>
+            <div className="text-right text-xs text-muted-foreground hidden sm:block">
+              <p>15% flat · apuração anual</p>
+              <p>Lei 14.754/2023</p>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Coluna Principal */}
@@ -558,6 +662,74 @@ export default function CalculadoraPage() {
                       {formErrors.cripto && (
                         <p className="text-xs text-destructive mt-1">{formErrors.cripto}</p>
                       )}
+                    </div>
+
+                    {/* Tipo de exchange — campo obrigatório para definir regime tributário */}
+                    <div className="sm:col-span-2">
+                      <Label htmlFor="tipoExchange" className="flex items-center gap-1.5">
+                        Corretora / Exchange
+                        <span className="text-destructive">*</span>
+                      </Label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1.5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setNovaOperacao({ ...novaOperacao, tipoExchange: "nacional" });
+                            setFormErrors((prev) => ({ ...prev, tipoExchange: undefined }));
+                          }}
+                          className={`flex items-center gap-2 p-3 rounded-lg border text-left transition-all ${
+                            novaOperacao.tipoExchange === "nacional"
+                              ? "border-green-500 bg-green-50 dark:bg-green-950/40 text-green-800 dark:text-green-300"
+                              : "border-input hover:border-green-300 hover:bg-green-50/50 dark:hover:bg-green-950/20"
+                          }`}
+                        >
+                          <Building2 className={`h-5 w-5 flex-shrink-0 ${novaOperacao.tipoExchange === "nacional" ? "text-green-600" : "text-muted-foreground"}`} />
+                          <div>
+                            <p className="font-medium text-sm">Brasileira</p>
+                            <p className="text-xs opacity-70">CNPJ no Brasil — Mercado Bitcoin, Foxbit, Novadax...</p>
+                          </div>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setNovaOperacao({ ...novaOperacao, tipoExchange: "estrangeira" });
+                            setFormErrors((prev) => ({ ...prev, tipoExchange: undefined }));
+                          }}
+                          className={`flex items-center gap-2 p-3 rounded-lg border text-left transition-all ${
+                            novaOperacao.tipoExchange === "estrangeira"
+                              ? "border-purple-500 bg-purple-50 dark:bg-purple-950/40 text-purple-800 dark:text-purple-300"
+                              : "border-input hover:border-purple-300 hover:bg-purple-50/50 dark:hover:bg-purple-950/20"
+                          }`}
+                        >
+                          <Globe className={`h-5 w-5 flex-shrink-0 ${novaOperacao.tipoExchange === "estrangeira" ? "text-purple-600" : "text-muted-foreground"}`} />
+                          <div>
+                            <p className="font-medium text-sm">Estrangeira</p>
+                            <p className="text-xs opacity-70">Sem CNPJ no Brasil — Binance global, Bybit, Coinbase...</p>
+                          </div>
+                        </button>
+                      </div>
+                      {novaOperacao.tipoExchange === "estrangeira" && (
+                        <div className="mt-2 p-2.5 rounded-lg bg-purple-50 dark:bg-purple-950/30 text-xs text-purple-700 dark:text-purple-400">
+                          <strong>Binance:</strong> selecione Estrangeira se usou a plataforma global (binance.com).
+                          Selecione Brasileira apenas se usou Binance Pay Brasil com CNPJ nacional.
+                        </div>
+                      )}
+                      {formErrors.tipoExchange && (
+                        <p className="text-xs text-destructive mt-1">{formErrors.tipoExchange}</p>
+                      )}
+                    </div>
+
+                    {/* Nome da exchange (opcional) */}
+                    <div>
+                      <Label htmlFor="exchange">Nome da Exchange <span className="text-muted-foreground">(opcional)</span></Label>
+                      <Input
+                        id="exchange"
+                        placeholder="Ex: Binance, Bybit, Mercado Bitcoin..."
+                        value={novaOperacao.exchange}
+                        onChange={(e) =>
+                          setNovaOperacao({ ...novaOperacao, exchange: e.target.value })
+                        }
+                      />
                     </div>
 
                     <div>
@@ -716,6 +888,11 @@ export default function CalculadoraPage() {
                                       {op.exchange}
                                     </span>
                                   )}
+                                  {op.tipoExchange === "estrangeira" && (
+                                    <span className="text-xs px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400">
+                                      exterior
+                                    </span>
+                                  )}
                                 </div>
                                 <p className="text-xs text-muted-foreground">
                                   {formatCrypto(op.quantidade)} {op.cripto} ·{" "}
@@ -764,11 +941,13 @@ export default function CalculadoraPage() {
 
           {/* Sidebar */}
           <div className="space-y-6">
+
+            {/* Resumo Mensal — Regime Nacional */}
             <Card className="border">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <DollarSign className="h-5 w-5 text-primary" />
-                  Resumo do Mês Atual
+                  <Building2 className="h-5 w-5 text-primary" />
+                  Regime Nacional — Mês Atual
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -812,7 +991,7 @@ export default function CalculadoraPage() {
                       <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" />
                       <div>
                         <p className="font-medium text-xs">Day Trade detectado</p>
-                        <p className="text-[11px] mt-0.5">Sem isenção R$35k · Alíquota 20% flat</p>
+                        <p className="text-[11px] mt-0.5">Sem isenção R$35k · Tabela progressiva (15–22,5%)</p>
                       </div>
                     </div>
                   )}
@@ -845,7 +1024,7 @@ export default function CalculadoraPage() {
                         <p className="text-xl font-bold mt-1">
                           {formatCurrency(resumoMesAtual.impostoDevido)}
                         </p>
-                        <p className="text-xs mt-1">Vencimento: último dia útil do mês seguinte</p>
+                        <p className="text-xs mt-1">DARF 4600 · último dia útil do mês seguinte</p>
                       </div>
                     </div>
                   )}
@@ -853,27 +1032,94 @@ export default function CalculadoraPage() {
               </CardContent>
             </Card>
 
+            {/* Resumo Anual — Regime Exterior */}
+            {temOperacoesExterior && resumosAnuaisExterior.map((r) => (
+              <Card key={r.ano} className="border border-purple-200 dark:border-purple-800">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Globe className="h-5 w-5 text-purple-600" />
+                    Regime Exterior — {r.ano}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Total Vendido</span>
+                    <span className="font-semibold text-sm">{formatCurrency(r.totalVendas)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Lucro Líquido Anual</span>
+                    <span className={`font-semibold text-sm ${r.lucroLiquidoAnual > 0 ? "text-green-600" : "text-muted-foreground"}`}>
+                      {formatCurrency(r.lucroLiquidoAnual)}
+                    </span>
+                  </div>
+                  {r.prejuizoAcumuladoRestante > 0 && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">Prejuízo do ano</span>
+                      <span className="font-semibold text-sm text-destructive">
+                        -{formatCurrency(r.prejuizoAcumuladoRestante)}
+                      </span>
+                    </div>
+                  )}
+                  <div className="border-t pt-3">
+                    {r.impostoEstimado > 0 ? (
+                      <div className="flex items-start gap-2 p-3 rounded-xl bg-purple-50 text-purple-800 dark:bg-purple-950/40 dark:text-purple-300">
+                        <DollarSign className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-medium text-sm">Imposto Estimado</p>
+                          <p className="text-xl font-bold mt-1">{formatCurrency(r.impostoEstimado)}</p>
+                          <p className="text-xs mt-1">15% · pago na declaração anual (não DARF)</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-start gap-2 p-3 rounded-xl bg-green-50 text-green-800 dark:bg-green-950/40 dark:text-green-300">
+                        <CheckCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-medium text-sm">Sem imposto no exterior</p>
+                          <p className="text-xs mt-0.5">Sem lucro líquido positivo em {r.ano}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-muted-foreground text-center pt-1">
+                    Lei 14.754/2023 · sem isenção de R$35k · apuração anual
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+
             {resumosMensais.some((r) => r.impostoDevido > 0) && (
               <DarfModal resumosMensais={resumosMensais} />
             )}
 
             <PortfolioCard portfolio={resumoGeral.portfolio} />
 
+            {/* Regras do IR */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Regras do IR</CardTitle>
               </CardHeader>
               <CardContent className="text-sm text-muted-foreground space-y-3">
-                <div className="p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
-                  <p className="font-medium text-foreground text-sm">Isenção (swing trade)</p>
-                  <p className="text-xs mt-0.5">Vendas até R$ 35.000/mês são isentas</p>
+                <div className="p-3 bg-muted/50 rounded-lg">
+                  <p className="font-medium text-foreground text-sm flex items-center gap-1.5">
+                    <Building2 className="h-4 w-4 text-primary" />
+                    Corretoras Brasileiras
+                  </p>
+                  <ul className="mt-1.5 space-y-1 text-xs">
+                    <li>Isenção: vendas até R$ 35.000/mês</li>
+                    <li>Apuração mensal · DARF código 4600</li>
+                    <li>Vencimento: último dia útil do mês seguinte</li>
+                  </ul>
                 </div>
                 <div className="p-3 bg-orange-50 dark:bg-orange-950/30 rounded-lg border border-orange-200 dark:border-orange-800">
-                  <p className="font-medium text-orange-800 dark:text-orange-300 text-sm">Day Trade</p>
-                  <p className="text-xs mt-0.5 text-orange-700 dark:text-orange-400">Sem isenção de R$ 35k · Alíquota fixa de 20%</p>
+                  <p className="font-medium text-orange-800 dark:text-orange-300 text-sm">Day Trade (cripto)</p>
+                  <p className="text-xs mt-0.5 text-orange-700 dark:text-orange-400">
+                    Sem isenção de R$35k · Tabela progressiva 15–22,5%
+                    <br />
+                    <span className="opacity-80">⚠️ Alíquota de 20% fixo é da bolsa — não se aplica a cripto</span>
+                  </p>
                 </div>
-                <div className="p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
-                  <p className="font-medium text-foreground text-sm">Alíquotas (swing)</p>
+                <div className="p-3 bg-muted/50 rounded-lg">
+                  <p className="font-medium text-foreground text-sm">Alíquotas progressivas (BR)</p>
                   <ul className="mt-1.5 space-y-1 text-xs">
                     <li className="flex justify-between"><span>Até R$ 5M</span><span className="font-medium">15%</span></li>
                     <li className="flex justify-between"><span>R$ 5M a 10M</span><span className="font-medium">17,5%</span></li>
@@ -881,9 +1127,17 @@ export default function CalculadoraPage() {
                     <li className="flex justify-between"><span>Acima R$ 30M</span><span className="font-medium">22,5%</span></li>
                   </ul>
                 </div>
-                <div className="p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
-                  <p className="font-medium text-foreground text-sm">Vencimento</p>
-                  <p className="text-xs mt-0.5">Último dia útil do mês seguinte · DARF código 4600</p>
+                <div className="p-3 bg-purple-50 dark:bg-purple-950/30 rounded-lg border border-purple-200 dark:border-purple-800">
+                  <p className="font-medium text-purple-800 dark:text-purple-300 text-sm flex items-center gap-1.5">
+                    <Globe className="h-4 w-4" />
+                    Exchanges Estrangeiras
+                  </p>
+                  <ul className="mt-1.5 space-y-1 text-xs text-purple-700 dark:text-purple-400">
+                    <li>Sem isenção de R$35k</li>
+                    <li>15% fixo sobre lucro líquido anual</li>
+                    <li>Apuração anual (declaração de IR)</li>
+                    <li>Lei 14.754/2023 + IN RFB 2.180/2024</li>
+                  </ul>
                 </div>
                 <Link
                   href="/legislacao"
