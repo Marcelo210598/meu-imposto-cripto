@@ -103,10 +103,10 @@ const regras = [
     icon: Globe,
     cor: "text-orange-600",
     bg: "bg-orange-50 dark:bg-orange-950",
-    titulo: "Criptoativos no exterior",
+    titulo: "Criptoativos no exterior — Lei 14.754/2023",
     descricao:
-      'Brasileiros com criptoativos em exchanges estrangeiras ou carteiras self-custody com saldo acima de US$ 1.000 (ou equivalente) devem declarar no CBE (Capitais Brasileiros no Exterior) ao Banco Central. Operações acima de R$ 30.000/mês também entram na IN 1888.',
-    detalhe: "Regulado pelo BACEN — CBE anual e trimestral",
+      'Operações em exchanges SEM CNPJ no Brasil (Binance global, Bybit, Coinbase, Kraken, OKX etc.) seguem a Lei 14.754/2023: alíquota fixa de 15% sobre o lucro líquido anual, sem a isenção de R$ 35.000/mês, e apuração anual na Declaração de Ajuste Anual (não via DARF mensal). Prejuízos do mesmo ano compensam ganhos, mas não são carregados ao ano seguinte. Obrigações acessórias: (1) declaração no CBE ao BACEN se saldo > US$ 1.000; (2) reporte via e-CAC se movimentação mensal superar R$ 30.000 (IN 1.888/2019).',
+    detalhe: "Lei 14.754/2023 + IN RFB 2.180/2024 · 15% flat · sem isenção de R$ 35k",
   },
   {
     icon: Scale,

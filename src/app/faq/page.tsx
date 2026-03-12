@@ -61,12 +61,12 @@ const faqs = [
       {
         pergunta: "Posso compensar prejuízos?",
         resposta:
-          "Não diretamente. Diferente de ações, prejuízos com criptomoedas não podem ser compensados com lucros futuros para fins de IR. Porém, o prejuízo reduz seu custo médio se você continuar comprando.",
+          "Sim. Prejuízos com criptoativos no regime nacional (exchanges com CNPJ no Brasil) podem ser compensados com ganhos futuros de criptoativos do mesmo regime. O prejuízo acumulado é carregado para os meses seguintes e reduz a base de cálculo do IR. No regime exterior (Lei 14.754/2023), prejuízos dentro do mesmo ano-calendário também compensam ganhos, mas não podem ser transferidos para anos seguintes.",
       },
       {
         pergunta: "Como declarar operações em exchanges internacionais?",
         resposta:
-          "As regras são as mesmas. A diferença é que você precisa converter os valores para Reais usando a cotação do dólar (PTAX) do dia da operação.",
+          "As regras são DIFERENTES das exchanges brasileiras. Exchanges estrangeiras (sem CNPJ no Brasil, como Binance global, Bybit, Coinbase, Kraken) seguem a Lei 14.754/2023: (1) Alíquota fixa de 15% sobre o lucro líquido anual — não existe a isenção de R$ 35.000; (2) Apuração é anual, paga na Declaração de Ajuste Anual (não gera DARF mensal); (3) Movimentações acima de R$ 30.000/mês exigem reporte via e-CAC (IN 1.888/2019). A conversão para reais usa a cotação PTAX do Banco Central.",
       },
     ],
   },
@@ -91,7 +91,32 @@ const faqs = [
       {
         pergunta: "Preciso declarar mesmo se não paguei imposto?",
         resposta:
-          "Sim. Mesmo operações isentas (vendas abaixo de R$ 35.000) devem ser informadas na declaração anual de IR, na ficha de Bens e Direitos (código 81 para criptoativos).",
+          "Sim. Mesmo operações isentas (vendas abaixo de R$ 35.000) devem ser informadas na declaração anual de IR, na ficha de Bens e Direitos (código 89 — Demais bens e direitos). O código 89 é o correto atualizado para criptoativos.",
+      },
+    ],
+  },
+  {
+    categoria: "Exchanges Estrangeiras (Lei 14.754/2023)",
+    perguntas: [
+      {
+        pergunta: "Por que exchanges estrangeiras têm regras diferentes?",
+        resposta:
+          "A Lei 14.754/2023 criou um regime tributário específico para criptoativos mantidos em plataformas no exterior (sem CNPJ no Brasil). O objetivo foi regularizar a tributação de investidores que operam em exchanges como Binance global, Bybit, Coinbase, Kraken e OKX. As regras são: (1) 15% flat sobre o lucro líquido anual — sem alíquota progressiva; (2) sem isenção de R$ 35.000/mês; (3) apuração anual paga na DAA (Declaração de Ajuste Anual), não via DARF mensal.",
+      },
+      {
+        pergunta: "A Binance é brasileira ou estrangeira?",
+        resposta:
+          "Depende da plataforma que você usou. A Binance Pay Brasil (operada pela Capitual/Latam) possui CNPJ no Brasil — segue o regime nacional com isenção de R$ 35k e DARF mensal. Já a plataforma global binance.com não tem CNPJ no Brasil e segue a Lei 14.754/2023 — 15% flat, sem isenção, apuração anual. Em caso de dúvida, verifique em qual entidade você criou sua conta.",
+      },
+      {
+        pergunta: "Preciso pagar DARF mensalmente por operações na Bybit, Coinbase ou Kraken?",
+        resposta:
+          "Não. Exchanges estrangeiras (Lei 14.754/2023) não geram DARF mensal. O imposto é calculado sobre o lucro líquido anual e pago integralmente na Declaração de Ajuste Anual do IRPF, com prazo até abril/maio do ano seguinte.",
+      },
+      {
+        pergunta: "O que é a obrigação do e-CAC para exchanges estrangeiras?",
+        resposta:
+          "Independentemente do imposto, se você movimentou mais de R$ 30.000 em um mês em exchanges estrangeiras, é obrigado a informar essas operações à Receita Federal via e-CAC (portal da Receita) até o último dia útil do mês seguinte. Essa é uma obrigação acessória (IN 1.888/2019) — separada do pagamento do imposto.",
       },
     ],
   },
