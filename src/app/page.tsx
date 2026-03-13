@@ -1,5 +1,6 @@
 import { Header } from "@/components/layout/header";
 import { Hero } from "@/components/home/hero";
+import { DemoPreview } from "@/components/home/demo-preview";
 import { Features } from "@/components/home/features";
 import { HowItWorks } from "@/components/home/how-it-works";
 import { SocialProof } from "@/components/home/social-proof";
@@ -13,6 +14,7 @@ export default function Home() {
       <Header />
       <main className="flex-1">
         <Hero />
+        <DemoPreview />
         <Features />
         <SocialProof />
         <HowItWorks />
