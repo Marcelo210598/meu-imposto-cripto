@@ -70,9 +70,9 @@ const regras = [
     icon: TrendingUp,
     cor: "text-amber-600",
     bg: "bg-amber-50 dark:bg-amber-950",
-    titulo: "Alíquotas progressivas — regime nacional",
+    titulo: "Alíquotas progressivas — regime de ganho de capital",
     descricao:
-      "Quando as vendas mensais superam R$ 35.000 em exchanges brasileiras, incide IR sobre o ganho de capital (receita de venda menos custo de aquisição). As alíquotas são progressivas. Day trade de criptoativos usa essa mesma tabela progressiva (não é 20% fixo, que se aplica apenas a day trade na bolsa de valores).",
+      "No regime tradicional de ganho de capital, quando o total alienado no mês supera R$ 35.000, incide IR sobre o ganho (receita de venda menos custo de aquisição). As alíquotas são progressivas. Essa lógica não deve ser resumida exclusivamente por referência a exchanges brasileiras, nem aplicada automaticamente a operações com enquadramento diverso. Day trade de criptoativos usa essa mesma tabela progressiva (não é 20% fixo, que se aplica apenas a day trade na bolsa de valores).",
     detalhe: "Base legal: Lei 13.259/2016",
     tabela: [
       { faixa: "Até R$ 5.000.000", aliquota: "15%" },
@@ -216,24 +216,14 @@ export default function LegislacaoPage() {
           </div>
         </section>
 
-        {/* Banner MP 1.303/2025 */}
-        <section className="py-5 px-4 bg-blue-50 dark:bg-blue-950/30 border-y border-blue-200 dark:border-blue-800">
+        {/* Nota contextual MP 1.303/2025 */}
+        <section className="py-3 px-4 border-y border-border/50">
           <div className="container mx-auto max-w-4xl">
-            <div className="flex items-start gap-3">
-              <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold text-blue-800 dark:text-blue-200">
-                  Contexto legislativo: MP 1.303/2025
-                </p>
-                <p className="text-sm text-blue-700 dark:text-blue-300 mt-0.5">
-                  O governo federal publicou a MP 1.303/2025 propondo mudanças na tributação de criptoativos
-                  (como alteração na isenção de R$ 35.000 e alíquota). A situação legislativa dessa medida
-                  deve ser verificada conforme o desfecho normativo efetivamente ocorrido. Verifique o
-                  status atualizado antes de tomar decisões com base nessas propostas. A ferramenta será
-                  atualizada conforme eventuais mudanças legislativas.
-                </p>
-              </div>
-            </div>
+            <p className="text-xs text-muted-foreground text-center">
+              Nota: a MP 1.303/2025, que propôs mudanças na tributação de criptoativos, teve tramitação
+              legislativa própria. Para saber se gerou alteração normativa efetiva, consulte o desfecho
+              legislativo atualizado.
+            </p>
           </div>
         </section>
 

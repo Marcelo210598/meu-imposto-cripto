@@ -1028,7 +1028,7 @@ export default function CalculadoraPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Building2 className="h-5 w-5 text-primary" />
-                  Regime Nacional — Mês Atual
+                  Regime de Ganho de Capital — Mês Atual
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -1183,10 +1183,10 @@ export default function CalculadoraPage() {
                 <div className="p-3 bg-muted/50 rounded-lg">
                   <p className="font-medium text-foreground text-sm flex items-center gap-1.5">
                     <Building2 className="h-4 w-4 text-primary" />
-                    Corretoras Brasileiras (regime de ganho de capital)
+                    Regime de ganho de capital
                   </p>
                   <ul className="mt-1.5 space-y-1 text-xs">
-                    <li>Isenção: vendas até R$ 35.000/mês</li>
+                    <li>Isenção: vendas até R$ 35.000/mês (quando aplicável)</li>
                     <li>Apuração mensal · DARF código 4600</li>
                     <li>Vencimento: último dia útil do mês seguinte</li>
                   </ul>
@@ -1215,10 +1215,17 @@ export default function CalculadoraPage() {
                   </p>
                   <ul className="mt-1.5 space-y-1 text-xs text-purple-700 dark:text-purple-400">
                     <li>Isenção de R$ 35.000 não se aplica neste regime</li>
-                    <li>15% sobre lucro líquido anual (conforme Lei 14.754/2023, quando aplicável)</li>
-                    <li>Apuração anual (declaração de IR)</li>
-                    <li>Em regra, pode se enquadrar na Lei 14.754/2023 + IN RFB 2.180/2024</li>
+                    <li>15% sobre lucro anual (quando enquadrado na Lei 14.754/2023)</li>
+                    <li>Apuração anual (Declaração de Ajuste Anual)</li>
+                    <li>Enquadramento depende da operação concreta</li>
                   </ul>
+                </div>
+                <div className="p-3 bg-muted/30 rounded-lg border border-border/50">
+                  <p className="font-medium text-foreground text-xs">Autocustódia, wallets e DEX</p>
+                  <p className="text-[11px] mt-1 text-muted-foreground">
+                    Operações em wallet própria, hardware wallet, MetaMask, DeFi ou DEX exigem análise específica
+                    e não devem ser classificadas automaticamente no regime de aplicações no exterior.
+                  </p>
                 </div>
                 <Link
                   href="/legislacao"
