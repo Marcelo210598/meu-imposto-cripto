@@ -72,7 +72,7 @@ const regras = [
     bg: "bg-amber-50 dark:bg-amber-950",
     titulo: "Alíquotas progressivas — regime de ganho de capital",
     descricao:
-      "No regime tradicional de ganho de capital, quando o total alienado no mês supera R$ 35.000, incide IR sobre o ganho (receita de venda menos custo de aquisição). As alíquotas são progressivas. Essa lógica não deve ser resumida exclusivamente por referência a exchanges brasileiras, nem aplicada automaticamente a operações com enquadramento diverso. Day trade de criptoativos usa essa mesma tabela progressiva (não é 20% fixo, que se aplica apenas a day trade na bolsa de valores).",
+      "Em regra, no regime tradicional de ganho de capital, a análise considera o total alienado no mês nas operações sujeitas a esse regime. Quando esse total supera R$ 35.000, incide IR sobre o ganho (receita de venda menos custo de aquisição). As alíquotas são progressivas. Essa lógica não deve ser resumida exclusivamente por referência a exchanges brasileiras, nem aplicada automaticamente a operações com enquadramento diverso. Day trade de criptoativos usa essa mesma tabela progressiva (não é 20% fixo, que se aplica apenas a day trade na bolsa de valores).",
     detalhe: "Base legal: Lei 13.259/2016",
     tabela: [
       { faixa: "Até R$ 5.000.000", aliquota: "15%" },
@@ -216,13 +216,12 @@ export default function LegislacaoPage() {
           </div>
         </section>
 
-        {/* Nota contextual MP 1.303/2025 */}
+        {/* Nota histórica MP 1.303/2025 */}
         <section className="py-3 px-4 border-y border-border/50">
           <div className="container mx-auto max-w-4xl">
             <p className="text-xs text-muted-foreground text-center">
-              Nota: a MP 1.303/2025, que propôs mudanças na tributação de criptoativos, teve tramitação
-              legislativa própria. Para saber se gerou alteração normativa efetiva, consulte o desfecho
-              legislativo atualizado.
+              Nota histórica: a MP 1.303/2025 propôs mudanças na tributação de criptoativos.
+              Essa referência é mantida apenas como contexto legislativo.
             </p>
           </div>
         </section>

@@ -503,29 +503,7 @@ export default function CalculadoraPage() {
 
       <main className="container mx-auto px-4 py-8">
 
-        {/* Banner MP 1.303/2025 */}
-        {!bannerMPFechado && (
-          <div className="mb-4 p-4 rounded-xl bg-blue-500/5 border border-blue-500/20 flex items-start justify-between gap-4 animate-fade-in">
-            <div className="flex items-start gap-3 flex-1 min-w-0">
-              <Info className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-medium text-sm text-blue-800 dark:text-blue-300">
-                  MP 1.303/2025 — verifique a situação legislativa
-                </p>
-                <p className="text-xs text-blue-700 dark:text-blue-400 mt-0.5">
-                  A Medida Provisória propôs fim da isenção de R$ 35.000 e alíquota única de 17,5%.
-                  A situação legislativa da MP 1.303/2025 deve ser verificada conforme o desfecho normativo efetivamente ocorrido.
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={() => setBannerMPFechado(true)}
-              className="text-blue-400 hover:text-blue-600 transition-colors flex-shrink-0 mt-0.5"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        )}
+        {/* Nota histórica MP 1.303/2025 — removido banner de destaque */}
 
         {/* Banner: usuário free logado */}
         {isLoggedIn && (session?.user as { plano?: string })?.plano === "gratis" && status !== "loading" && (
@@ -1213,12 +1191,14 @@ export default function CalculadoraPage() {
                     <Globe className="h-4 w-4" />
                     Operações com instituição/custódia no exterior
                   </p>
-                  <ul className="mt-1.5 space-y-1 text-xs text-purple-700 dark:text-purple-400">
-                    <li>Isenção de R$ 35.000 não se aplica neste regime</li>
-                    <li>15% sobre lucro anual (quando enquadrado na Lei 14.754/2023)</li>
-                    <li>Apuração anual (Declaração de Ajuste Anual)</li>
-                    <li>Enquadramento depende da operação concreta</li>
-                  </ul>
+                  <p className="text-xs text-purple-700 dark:text-purple-400 mt-1.5">
+                    Em determinadas hipóteses, ativos custodiados ou negociados por instituições no exterior
+                    podem seguir regime próprio de apuração anual.
+                  </p>
+                  <p className="text-xs text-purple-700 dark:text-purple-400 mt-1">
+                    A isenção de R$ 35.000 e a alíquota de 15% não devem ser aplicadas automaticamente
+                    sem confirmar o enquadramento jurídico da operação.
+                  </p>
                 </div>
                 <div className="p-3 bg-muted/30 rounded-lg border border-border/50">
                   <p className="font-medium text-foreground text-xs">Autocustódia, wallets e DEX</p>
