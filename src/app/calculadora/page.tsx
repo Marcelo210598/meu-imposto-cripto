@@ -380,8 +380,7 @@ export default function CalculadoraPage() {
                 Aplica-se isenção de R$35k/mês e DARF mensal.
               </span>
               <span className="block pl-2 border-l-2 border-purple-400 text-xs">
-                <strong>Binance Global (binance.com)</strong> — sem CNPJ no Brasil.
-                Pode se enquadrar no regime de aplicações financeiras no exterior (15% sobre resultado anual, conforme Lei 14.754/2023).
+                <strong>Binance Global (binance.com)</strong> — não possui CNPJ no Brasil — pode se enquadrar no regime de aplicações no exterior (15% sobre resultado anual, conforme Lei 14.754/2023).
               </span>
             </DialogDescription>
           </DialogHeader>
@@ -511,11 +510,11 @@ export default function CalculadoraPage() {
               <Info className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-medium text-sm text-blue-800 dark:text-blue-300">
-                  MP 1.303/2025 — ainda não está em vigor
+                  MP 1.303/2025 — verifique a situação legislativa
                 </p>
                 <p className="text-xs text-blue-700 dark:text-blue-400 mt-0.5">
-                  A Medida Provisória propôs fim da isenção de R$35k e alíquota única de 17,5%, mas não foi aprovada.
-                  As regras atuais (isenção R$35k + progressiva 15-22,5%) continuam válidas para 2026.
+                  A Medida Provisória propôs fim da isenção de R$ 35.000 e alíquota única de 17,5%.
+                  A situação legislativa da MP 1.303/2025 deve ser verificada conforme o desfecho normativo efetivamente ocorrido.
                 </p>
               </div>
             </div>
@@ -586,7 +585,7 @@ export default function CalculadoraPage() {
               </p>
               <p className="text-xs text-orange-700 dark:text-orange-400 mt-0.5">
                 Você movimentou{" "}
-                <strong>{formatCurrency(alertaExteriorMes[1])}</strong> em exchanges estrangeiras em{" "}
+                <strong>{formatCurrency(alertaExteriorMes[1])}</strong> em operações com criptoativos em{" "}
                 <strong>
                   {new Date(alertaExteriorMes[0] + "-15").toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}
                 </strong>.
@@ -633,7 +632,7 @@ export default function CalculadoraPage() {
               <Globe className="h-5 w-5 text-purple-600" />
             </div>
             <div className="flex-1">
-              <p className="text-sm text-muted-foreground">Imposto Estimado — Exchanges Estrangeiras</p>
+              <p className="text-sm text-muted-foreground">Imposto Estimado — Operações com instituição/custódia no exterior</p>
               <p className="text-2xl font-bold text-purple-600">
                 {formatCurrency(resumoGeral.impostoTotalExterior)}
               </p>
@@ -782,7 +781,7 @@ export default function CalculadoraPage() {
                           <Globe className={`h-5 w-5 flex-shrink-0 ${novaOperacao.tipoExchange === "estrangeira" ? "text-purple-600" : "text-muted-foreground"}`} />
                           <div>
                             <p className="font-medium text-sm">Estrangeira</p>
-                            <p className="text-xs opacity-70">Sem CNPJ no Brasil — Binance global, Bybit, Coinbase...</p>
+                            <p className="text-xs opacity-70">Plataformas no exterior — Binance global, Bybit, Coinbase...</p>
                           </div>
                         </button>
                       </div>
@@ -1114,13 +1113,13 @@ export default function CalculadoraPage() {
               </CardContent>
             </Card>
 
-            {/* Resumo Anual — Regime Exterior */}
+            {/* Resumo Anual — Regime de aplicações no exterior */}
             {temOperacoesExterior && resumosAnuaisExterior.map((r) => (
               <Card key={r.ano} className="border border-purple-200 dark:border-purple-800">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Globe className="h-5 w-5 text-purple-600" />
-                    Regime Exterior — {r.ano}
+                    Regime de aplicações no exterior — {r.ano}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -1195,7 +1194,7 @@ export default function CalculadoraPage() {
                 <div className="p-3 bg-orange-50 dark:bg-orange-950/30 rounded-lg border border-orange-200 dark:border-orange-800">
                   <p className="font-medium text-orange-800 dark:text-orange-300 text-sm">Day Trade (cripto — regime de ganho de capital)</p>
                   <p className="text-xs mt-0.5 text-orange-700 dark:text-orange-400">
-                    Sem isenção de R$35k · Tabela progressiva 15–22,5%
+                    Isenção de R$ 35.000 não se aplica neste regime · Tabela progressiva 15–22,5%
                     <br />
                     <span className="opacity-80">⚠️ Alíquota de 20% fixo é da bolsa — não se aplica a cripto</span>
                   </p>

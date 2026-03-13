@@ -36,8 +36,8 @@ interface Exemplo {
 
 const exemplos: Exemplo[] = [
   {
-    titulo: "Exemplo 1: Venda com lucro ISENTA",
-    descricao: "Vendas abaixo de R$ 35.000 no mês",
+    titulo: "Exemplo 1: Venda com lucro isenta (regime de ganho de capital)",
+    descricao: "Vendas abaixo de R$ 35.000 no mês — regime de ganho de capital",
     cenario: {
       compra: { data: "01/01/2024", qtd: 0.1, valor: 20000 },
       venda: { data: "15/03/2024", qtd: 0.1, valor: 30000 },
@@ -56,8 +56,8 @@ const exemplos: Exemplo[] = [
     },
   },
   {
-    titulo: "Exemplo 2: Venda com lucro TRIBUTÁVEL",
-    descricao: "Vendas acima de R$ 35.000 no mês",
+    titulo: "Exemplo 2: Venda com lucro tributável (regime de ganho de capital)",
+    descricao: "Vendas acima de R$ 35.000 no mês — regime de ganho de capital",
     cenario: {
       compras: [
         { data: "01/01/2024", qtd: 0.5, valor: 50000 },
@@ -152,6 +152,11 @@ export default function ExemplosPage() {
             </h1>
             <p className="text-lg text-muted-foreground">
               Entenda como funciona a tributação com exemplos práticos
+            </p>
+            <p className="text-sm text-muted-foreground mt-4 max-w-2xl mx-auto bg-muted/50 rounded-lg p-3 border border-border/50">
+              Estes exemplos ilustram, em regra, situações sujeitas ao regime tradicional de ganho de capital.
+              Operações com instituição ou custódia no exterior, autocustódia, DEX ou certos ativos digitais
+              podem exigir enquadramento diferente.
             </p>
           </div>
 
@@ -267,17 +272,21 @@ export default function ExemplosPage() {
           {/* Resumo das Regras */}
           <Card className="mt-12">
             <CardHeader>
-              <CardTitle>Resumo das Regras</CardTitle>
+              <CardTitle>Resumo — Regime de Ganho de Capital</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                As regras abaixo aplicam-se, em regra, ao regime tradicional de ganho de capital.
+                Outros regimes podem ter lógica diferente.
+              </p>
             </CardHeader>
             <CardContent>
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg">
                   <h4 className="font-medium text-green-800 dark:text-green-200 mb-2 flex items-center gap-2">
                     <Check className="h-4 w-4" />
-                    Você NÃO paga imposto quando:
+                    Em regra, pode não haver imposto quando:
                   </h4>
                   <ul className="text-sm text-green-700 dark:text-green-300 space-y-1">
-                    <li>• Vendas no mês ≤ R$ 35.000</li>
+                    <li>• Vendas no mês ≤ R$ 35.000 (regime de ganho de capital)</li>
                     <li>• Houve prejuízo na operação</li>
                     <li>• Apenas comprou (não vendeu)</li>
                   </ul>
@@ -285,12 +294,12 @@ export default function ExemplosPage() {
                 <div className="p-4 bg-amber-50 dark:bg-amber-950 rounded-lg">
                   <h4 className="font-medium text-amber-800 dark:text-amber-200 mb-2 flex items-center gap-2">
                     <TrendingUp className="h-4 w-4" />
-                    Você PAGA imposto quando:
+                    Em regra, pode haver imposto quando:
                   </h4>
                   <ul className="text-sm text-amber-700 dark:text-amber-300 space-y-1">
-                    <li>• Vendas no mês &gt; R$ 35.000</li>
+                    <li>• Vendas no mês &gt; R$ 35.000 (regime de ganho de capital)</li>
                     <li>• E houve lucro na operação</li>
-                    <li>• Alíquota: 15% a 22,5%</li>
+                    <li>• Alíquotas progressivas: 15% a 22,5%</li>
                   </ul>
                 </div>
               </div>

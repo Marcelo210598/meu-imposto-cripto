@@ -85,5 +85,5 @@ export function textoAlertaECAC(totalVendido: number, mes: string): string {
   ];
   const nomeMes = nomesMes[parseInt(mesNum) - 1];
   const r = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(totalVendido);
-  return `Você movimentou ${r} em exchanges estrangeiras em ${nomeMes}/${ano}. Como esse valor supera R$ 30.000, você é obrigado a reportar essas operações via e-CAC até o último dia útil do próximo mês (IN 1.888/2019).`;
+  return `Você movimentou ${r} em operações com criptoativos em ${nomeMes}/${ano}. Como esse valor supera R$ 30.000, pode haver obrigação de reporte via e-CAC até o último dia útil do próximo mês (IN 1.888/2019). Essa obrigação pode alcançar também operações fora de exchange, quando aplicável.`;
 }

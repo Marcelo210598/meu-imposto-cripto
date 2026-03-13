@@ -96,10 +96,10 @@ const faqs = [
     ],
   },
   {
-    categoria: "Exchanges Estrangeiras (Lei 14.754/2023)",
+    categoria: "Operações com Instituição ou Custódia no Exterior",
     perguntas: [
       {
-        pergunta: "Por que exchanges estrangeiras têm regras diferentes?",
+        pergunta: "Por que operações no exterior podem ter regras diferentes?",
         resposta:
           "A Lei 14.754/2023 criou um regime tributário específico para investimentos em entidades no exterior. O critério central é o enquadramento jurídico da operação — localização da instituição custodiante, existência de intermediário estrangeiro e natureza do ativo — não apenas a existência ou ausência de CNPJ no Brasil. Quando aplicável, as regras são: (1) 15% sobre o lucro líquido anual — sem alíquota progressiva; (2) sem isenção de R$ 35.000/mês; (3) apuração anual paga na Declaração de Ajuste Anual, não via DARF mensal. Para situações de autocustódia, DEX ou operações sem intermediário, o enquadramento deve ser avaliado com cautela.",
       },
@@ -114,12 +114,12 @@ const faqs = [
           "Em regra, operações enquadradas no regime de aplicações financeiras no exterior não geram DARF mensal. A tributação tende a ser calculada sobre o resultado anual e paga na Declaração de Ajuste Anual do IRPF.",
       },
       {
-        pergunta: "O que é a obrigação do e-CAC para exchanges estrangeiras?",
+        pergunta: "O que é a obrigação de reporte via e-CAC?",
         resposta:
           "A IN 1.888/2019 estabelece obrigação de reporte quando o volume mensal em criptoativos supera R$ 30.000. Essa obrigação não se limita apenas a exchanges estrangeiras — pode alcançar operações realizadas fora de exchange quando aplicável. O reporte é feito via e-CAC (portal da Receita Federal) até o último dia útil do mês seguinte. Trata-se de obrigação acessória, separada do pagamento do imposto. A ferramenta identifica automaticamente quando esse limite é atingido em exchanges informadas pelo usuário, mas não cobre operações em wallets próprias ou DEX.",
       },
       {
-        pergunta: "Wallet própria, MetaMask ou DEX seguem as mesmas regras de exchanges estrangeiras?",
+        pergunta: "Wallet própria, MetaMask ou DEX seguem as mesmas regras de operações no exterior?",
         resposta:
           "Não necessariamente. Autocustódia (wallet própria, hardware wallet, MetaMask) e operações em DEX sem intermediário não devem ser tratadas automaticamente como 'ativo no exterior' só porque envolvem tecnologia descentralizada ou acesso a protocolos estrangeiros. O enquadramento tributário depende da natureza da operação, da existência de intermediário e da forma de custódia. Esse é um tema com interpretações ainda em desenvolvimento na doutrina e na prática administrativa — recomendamos consultar um especialista para essas situações.",
       },

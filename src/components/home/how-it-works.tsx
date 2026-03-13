@@ -33,7 +33,7 @@ const steps = [
     icon: Send,
     title: "Exporte o relatório",
     description:
-      "Para exchanges brasileiras: exporte no formato GCAP da Receita Federal e gere o DARF mensal. Para exchanges estrangeiras: gere o relatório anual para preenchimento da Declaração de Ajuste Anual do IRPF.",
+      "No regime de ganho de capital: exporte no formato GCAP da Receita Federal e gere o DARF mensal. Para operações com possível enquadramento no regime de aplicações no exterior: gere o relatório anual para preenchimento da Declaração de Ajuste Anual do IRPF.",
     gradient: "from-orange-500 to-amber-600",
     shadow: "shadow-orange-500/30",
   },

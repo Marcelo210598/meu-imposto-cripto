@@ -51,7 +51,7 @@ const timeline = [
     ano: "Jul 2026",
     titulo: "DeCripto entra em vigor",
     descricao:
-      "Novo modelo de reporte obrigatório. Exchanges estrangeiras também serão obrigadas a reportar operações de brasileiros à Receita Federal. Escopo ampliado: pode incluir staking, DeFi, NFTs e carteiras self-custody — os limites e condições exatos estão definidos na IN RFB 2.291/2025.",
+      "Novo modelo de reporte obrigatório. Exchanges estrangeiras e outras instituições podem ser obrigadas a reportar operações de brasileiros à Receita Federal. Escopo ampliado: pode incluir staking, DeFi, NFTs e carteiras self-custody — os limites e condições estão definidos na IN RFB 2.291/2025.",
     status: "futuro",
   },
 ];
@@ -143,7 +143,7 @@ const faqLegislacao = [
   {
     pergunta: "O que muda com a DeCripto em 2026?",
     resposta:
-      "A DeCripto amplia o escopo de reporting: exchanges estrangeiras e provedores de serviços DeFi também serão obrigados a reportar operações de brasileiros. O padrão segue o CARF da OCDE, permitindo troca automática de informações entre países. A transparência aumenta significativamente.",
+      "A DeCripto amplia o escopo de reporte: exchanges estrangeiras e provedores de serviços DeFi podem ser obrigados a reportar operações de brasileiros. O padrão segue o CARF da OCDE, permitindo troca automática de informações entre países.",
   },
   {
     pergunta: "Preciso declarar mesmo sem ter vendido nada?",
@@ -223,13 +223,14 @@ export default function LegislacaoPage() {
               <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-semibold text-blue-800 dark:text-blue-200">
-                  Atenção: MP 1.303/2025 — ainda não está em vigor
+                  Contexto legislativo: MP 1.303/2025
                 </p>
                 <p className="text-sm text-blue-700 dark:text-blue-300 mt-0.5">
-                  O governo federal publicou a MP 1.303/2025 propondo mudanças como fim da isenção de R$ 35.000
-                  e alíquota única de 17,5% para criptoativos. Essa medida ainda não está em vigor.
-                  As regras atuais continuam válidas para 2026.
-                  Acompanharemos e atualizaremos a ferramenta caso a MP seja aprovada pelo Congresso Nacional.
+                  O governo federal publicou a MP 1.303/2025 propondo mudanças na tributação de criptoativos
+                  (como alteração na isenção de R$ 35.000 e alíquota). A situação legislativa dessa medida
+                  deve ser verificada conforme o desfecho normativo efetivamente ocorrido. Verifique o
+                  status atualizado antes de tomar decisões com base nessas propostas. A ferramenta será
+                  atualizada conforme eventuais mudanças legislativas.
                 </p>
               </div>
             </div>
@@ -415,7 +416,7 @@ export default function LegislacaoPage() {
                   {
                     titulo: "O que muda",
                     itens: [
-                      "Exchanges estrangeiras obrigadas a reportar",
+                      "Exchanges estrangeiras podem ser obrigadas a reportar",
                       "Inclui operações DeFi e NFTs",
                       "Troca automática de dados entre países",
                       "Reporte de carteiras self-custody acima de R$ 5k (quando aplicável)",
