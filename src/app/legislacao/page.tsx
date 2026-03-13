@@ -61,10 +61,10 @@ const regras = [
     icon: CheckCircle,
     cor: "text-green-600",
     bg: "bg-green-50 dark:bg-green-950",
-    titulo: "Isenção de R$ 35.000/mês — regime nacional",
+    titulo: "Isenção de R$ 35.000/mês — regime de ganho de capital",
     descricao:
-      "Se o total de vendas de criptoativos no mês for igual ou inferior a R$ 35.000, o ganho é isento de IR. Atenção: o critério é o valor total vendido no mês, não o lucro. ⚠️ Esta isenção aplica-se exclusivamente a operações em exchanges com CNPJ brasileiro (Mercado Bitcoin, Foxbit, NovaDAX etc.). Exchanges estrangeiras (Binance global, Bybit, Coinbase, Kraken etc.) seguem a Lei 14.754/2023 e não possuem faixa de isenção — qualquer lucro é tributado.",
-    detalhe: "Base legal: Lei 9.250/1995 c/c Art. 22 da Lei 9.532/1997 — aplica-se apenas ao regime nacional",
+      "Em regra, nas alienações sujeitas ao regime tradicional de ganho de capital, se o total de vendas de criptoativos no mês for igual ou inferior a R$ 35.000, o ganho pode ser isento de IR. O critério considera o valor total alienado no mês, e não apenas o lucro. Atenção: essa lógica não deve ser aplicada automaticamente a toda operação envolvendo plataforma estrangeira. Em algumas estruturas com instituição ou custódia no exterior, o tratamento pode seguir o regime de aplicações financeiras no exterior, com apuração anual. O enquadramento depende da operação concreta. Nota: o simples fato de uma plataforma não ter CNPJ no Brasil não resolve, por si só, o enquadramento tributário.",
+    detalhe: "Base legal: Art. 22 da Lei 9.532/1997 — aplica-se ao regime de ganho de capital",
   },
   {
     icon: TrendingUp,
@@ -85,10 +85,10 @@ const regras = [
     icon: Clock,
     cor: "text-blue-600",
     bg: "bg-blue-50 dark:bg-blue-950",
-    titulo: "Prazo de pagamento — DARF (regime nacional)",
+    titulo: "Prazo de pagamento",
     descricao:
-      "Para exchanges com CNPJ no Brasil: o imposto deve ser recolhido via DARF até o último dia útil do mês seguinte ao da operação. Para exchanges estrangeiras (Lei 14.754/2023): não há DARF mensal — o imposto é calculado sobre o lucro líquido anual e pago na Declaração de Ajuste Anual do IRPF.",
-    detalhe: "Código DARF para ganho de capital: 4600 (aplica-se ao regime nacional)",
+      "Nas operações sujeitas ao regime tradicional de ganho de capital, o imposto, quando devido, é recolhido via DARF até o último dia útil do mês seguinte ao da alienação. Código DARF: 4600. Já nas hipóteses enquadradas como aplicações financeiras no exterior, a tributação ocorre de forma anual, na Declaração de Ajuste Anual do IRPF, observadas as regras aplicáveis ao caso concreto.",
+    detalhe: "DARF 4600 (ganho de capital) · Declaração Anual (aplicações no exterior)",
   },
   {
     icon: FileText,
@@ -96,17 +96,17 @@ const regras = [
     bg: "bg-purple-50 dark:bg-purple-950",
     titulo: "Declaração Anual (IRPF)",
     descricao:
-      'Criptoativos em geral devem ser declarados na ficha "Bens e Direitos" do IRPF anual quando o custo de aquisição total for superior a R$ 5.000. Mesmo sem ter vendido nada, a declaração é obrigatória se o saldo superar esse limite. O enquadramento e o código de declaração podem variar conforme o tipo de criptoativo e as instruções do programa DIRPF do ano-calendário correspondente — consulte o guia da Receita Federal vigente ou um contador para confirmar o código correto para cada ativo.',
-    detalhe: "Código 89 tende a ser utilizado para criptomoedas em geral — verifique as instruções do DIRPF do ano vigente para cada tipo de ativo",
+      'Criptoativos devem ser informados na ficha "Bens e Direitos" da declaração anual do IRPF conforme as regras vigentes da Receita Federal para o respectivo ano-calendário e conforme a natureza do ativo. O enquadramento não deve ser tratado de forma genérica para todos os criptoativos. O grupo, o código e a descrição podem variar conforme o tipo de ativo e as orientações da Receita no programa da DIRPF do ano correspondente.',
+    detalhe: "Antes de preencher, confira os códigos e orientações atualizados no programa da DIRPF do respectivo exercício",
   },
   {
     icon: Globe,
     cor: "text-orange-600",
     bg: "bg-orange-50 dark:bg-orange-950",
-    titulo: "Criptoativos no exterior — Lei 14.754/2023",
+    titulo: "Criptoativos com instituição ou custódia no exterior",
     descricao:
-      'A Lei 14.754/2023 criou um regime específico para investimentos em plataformas no exterior. Em regra, aplica-se quando os criptoativos estão custodiados por instituição localizada fora do Brasil e há um intermediário estrangeiro na operação — o que tende a coincidir com o uso de exchanges sem CNPJ no Brasil, mas o enquadramento correto depende da natureza da operação e deve ser avaliado caso a caso. Quando aplicável: alíquota fixa de 15% sobre o lucro líquido anual, sem a isenção de R$ 35.000/mês, e apuração anual na Declaração de Ajuste Anual (não via DARF mensal). Prejuízos do ano compensam ganhos do mesmo ano. Obrigações acessórias: (1) CBE ao BACEN — obrigatório se saldo em 31/12 for igual ou superior a US$ 1.000.000 (CBE anual) ou US$ 100.000.000 em qualquer trimestre (CBE trimestral) — obrigação distinta do IRPF; (2) reporte via e-CAC se movimentação mensal superar R$ 30.000, incluindo operações fora de exchanges quando aplicável (IN 1.888/2019). Autocustódia (wallets próprias, hardware wallets) e operações em DEX não devem ser tratadas automaticamente como "ativo no exterior" — o enquadramento depende da natureza da operação.',
-    detalhe: "Lei 14.754/2023 + IN RFB 2.180/2024 · 15% sobre lucro anual · sem isenção de R$ 35k · consulte especialista para casos de custódia própria e DEX",
+      "A Lei 14.754/2023 e a regulamentação aplicável passaram a tratar, em determinadas hipóteses, ativos virtuais como aplicações financeiras no exterior. Em regra, isso pode alcançar ativos custodiados ou negociados por instituições localizadas no exterior, conforme o enquadramento jurídico da operação. Esse tratamento não deve ser definido automaticamente apenas porque a plataforma é estrangeira ou porque não possui CNPJ no Brasil. Ativos em autocustódia, sem intermediário, exigem análise própria e não devem ser classificados automaticamente como ativos no exterior. Quando houver enquadramento nesse regime, a tributação tende a ocorrer de forma anual, na Declaração de Ajuste Anual do IRPF, à alíquota de 15%, observadas as regras legais aplicáveis. Perdas e compensações devem observar o regime específico, não sendo recomendável misturar automaticamente com o regime de ganho de capital. Capitais Brasileiros no Exterior (CBE): obrigação do Banco Central, distinta do IRPF — CBE anual se saldo ≥ US$ 1.000.000 em 31/12; CBE trimestral se ≥ US$ 100.000.000. Obrigação acessória de reporte: não se limita a operações em exchange — pode alcançar operações fora de exchange quando o valor mensal ultrapassar o limite legal aplicável (IN 1.888/2019).",
+    detalhe: "Lei 14.754/2023 + IN RFB 2.180/2024 · Consulte especialista para casos de autocustódia, DEX e operações sem intermediário",
   },
   {
     icon: Scale,
@@ -123,7 +123,7 @@ const faqLegislacao = [
   {
     pergunta: "Troca de cripto por cripto (BTC → ETH) é tributada?",
     resposta:
-      "Em regra, a Receita Federal entende que a troca de criptoativos pode constituir fato gerador de IR, mesmo sem conversão para reais. O valor de mercado no momento da troca tende a ser usado como base de cálculo. Para operações em exchanges nacionais, a regra de isenção dos R$ 35.000/mês pode se aplicar. Para operações em exchanges sujeitas à Lei 14.754/2023, não há faixa de isenção — a tributação é anual e incide sobre o resultado líquido. Trocas realizadas diretamente em wallets ou DEX têm enquadramento menos consolidado e devem ser analisadas caso a caso.",
+      "A troca de um criptoativo por outro pode caracterizar fato gerador tributário, porque normalmente envolve a alienação de um ativo e a aquisição de outro. No entanto, a forma de apuração depende do regime aplicável ao caso concreto. Nas hipóteses sujeitas ao regime tradicional de ganho de capital, a análise costuma considerar a lógica das alienações e, quando cabível, a regra de isenção mensal de R$ 35.000. Já nas hipóteses enquadradas no regime de aplicações financeiras no exterior, a apuração segue a disciplina própria desse regime. Por isso, a regra dos R$ 35.000 não deve ser aplicada automaticamente a todo swap.",
   },
   {
     pergunta: "Staking e yield farming são tributados?",
@@ -133,12 +133,12 @@ const faqLegislacao = [
   {
     pergunta: "NFTs pagam imposto?",
     resposta:
-      "Em regra, a venda de NFTs com lucro tende a ser tratada como ganho de capital. No entanto, o enquadramento pode variar conforme a natureza do ativo — NFTs que representem utilidade, acesso a serviços ou outras formas de ativo podem ter tratamento distinto. Não existe regra única e definitiva para todos os NFTs. Recomendamos consultar um especialista para casos específicos, especialmente em volumes relevantes. A isenção de R$ 35.000/mês em regra se aplica quando as operações ocorrem em exchanges nacionais.",
+      "O tratamento tributário dos NFTs exige cautela e depende da natureza do ativo e da operação realizada. Nem todo NFT deve ser tratado automaticamente da mesma forma que os demais criptoativos, nem como aplicação financeira no exterior em qualquer situação. Em alguns casos, o enquadramento pode variar conforme o conteúdo econômico do ativo representado. Por isso, a análise de NFTs deve ser feita caso a caso.",
   },
   {
     pergunta: "Posso compensar prejuízos de cripto?",
     resposta:
-      "Sim, em regra. No regime nacional (exchanges com CNPJ no Brasil), prejuízos com criptoativos podem ser compensados com ganhos futuros de criptoativos do mesmo regime, mês a mês. No regime da Lei 14.754/2023 (plataformas no exterior), prejuízos dentro do mesmo ano-calendário compensam ganhos do mesmo regime — os não utilizados podem ser aproveitados em anos posteriores. Importante: os regimes não se comunicam entre si para fins de compensação. O prejuízo deve ser registrado na declaração anual.",
+      "A compensação de prejuízos depende do regime tributário aplicável à operação. Nas situações sujeitas ao regime tradicional de ganho de capital, a análise deve observar as regras próprias desse regime. Já nas hipóteses enquadradas como aplicações financeiras no exterior, perdas e ganhos seguem a disciplina específica desse regime, inclusive quanto ao período em que a compensação pode ocorrer. Não é recomendável misturar automaticamente prejuízos de regimes diferentes.",
   },
   {
     pergunta: "O que muda com a DeCripto em 2026?",
@@ -149,6 +149,11 @@ const faqLegislacao = [
     pergunta: "Preciso declarar mesmo sem ter vendido nada?",
     resposta:
       "Sim, se o custo de aquisição total for superior a R$ 5.000, você deve declarar os criptoativos na ficha Bens e Direitos, informando o custo de aquisição (e não o valor de mercado). Não é obrigatório atualizar o valor de mercado anualmente.",
+  },
+  {
+    pergunta: "Autocustódia, wallets próprias e DEX",
+    resposta:
+      "Operações com wallet própria, hardware wallet, MetaMask, protocolos DeFi ou DEX exigem atenção especial. Essas situações não devem ser tratadas automaticamente da mesma forma que operações realizadas com custódia em instituição localizada no exterior. A presença ou ausência de intermediário, a forma de custódia e a natureza da operação podem alterar o enquadramento tributário e as obrigações acessórias.",
   },
 ];
 
@@ -241,17 +246,32 @@ export default function LegislacaoPage() {
                   Aviso legal
                 </p>
                 <p className="text-sm text-amber-700 dark:text-amber-300">
-                  As informações aqui são de caráter educativo e não constituem
-                  consultoria fiscal ou jurídica. O conteúdo mistura diferentes
-                  hierarquias normativas: leis (fontes primárias), instruções
-                  normativas da Receita Federal (obrigações acessórias e
-                  reporte), orientações de preenchimento da DIRPF (caráter
-                  declaratório) e interpretações sobre temas ainda não
-                  consolidados. Muitos pontos envolvem cautela e podem depender
-                  de consulta especializada. A legislação tributária está sujeita
-                  a alterações.
+                  Este conteúdo tem finalidade educacional e resume regras tributárias
+                  que podem exigir interpretação conforme a estrutura da operação.
+                  O conteúdo mistura diferentes hierarquias normativas: leis federais
+                  (fontes primárias), instruções normativas da Receita Federal
+                  (obrigações acessórias), orientações de preenchimento da DIRPF
+                  (caráter declaratório) e interpretações sobre temas ainda não
+                  consolidados. Em casos com autocustódia, DEX, NFTs ou estruturas
+                  no exterior, a revisão por contador ou advogado tributarista pode
+                  ser recomendável. A legislação tributária está sujeita a alterações.
                 </p>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Como ler estas regras */}
+        <section className="py-4 px-4">
+          <div className="container mx-auto max-w-4xl">
+            <div className="bg-muted/50 rounded-lg p-5 border border-border/50">
+              <h3 className="font-semibold text-sm mb-3">Como ler estas regras</h3>
+              <ul className="space-y-1.5 text-sm text-muted-foreground">
+                <li><strong>Incidência do imposto:</strong> define quando e como pode haver tributação.</li>
+                <li><strong>Obrigação acessória:</strong> define quando a operação precisa ser informada à Receita ou a outro órgão.</li>
+                <li><strong>Declaração anual:</strong> trata do preenchimento do IRPF.</li>
+                <li><strong>Interpretação:</strong> alguns casos, como autocustódia, DEX e certos NFTs, exigem análise mais cuidadosa.</li>
+              </ul>
             </div>
           </div>
         </section>
@@ -404,7 +424,7 @@ export default function LegislacaoPage() {
                   {
                     titulo: "O que permanece igual",
                     itens: [
-                      "Isenção de R$ 35.000/mês (regime nacional)",
+                      "Isenção de R$ 35.000/mês (regime de ganho de capital)",
                       "Alíquotas de 15% a 22,5%",
                       "DARF para recolhimento mensal",
                       "Declaração anual no IRPF",

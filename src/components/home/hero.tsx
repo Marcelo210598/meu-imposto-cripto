@@ -3,9 +3,9 @@ import { ArrowRight, Shield, Zap, Calculator, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const stats = [
-  { icon: Calculator, value: "R$ 35 mil", label: "Isenção mensal para corretoras brasileiras" },
-  { icon: Zap,        value: "15–22,5%",  label: "Alíquotas progressivas (corretoras BR)"     },
-  { icon: Globe,      value: "15% fixo",  label: "Corretoras estrangeiras (Lei 14.754/2023)"  },
+  { icon: Calculator, value: "R$ 35 mil", label: "Isenção mensal (regime de ganho de capital)" },
+  { icon: Zap,        value: "15–22,5%",  label: "Alíquotas progressivas (ganho de capital)"     },
+  { icon: Globe,      value: "15%",       label: "Aplicações no exterior — verificar enquadramento" },
   { icon: Shield,     value: "100%",      label: "Dados seguros e privados"                   },
 ];
 

@@ -55,7 +55,7 @@ export function SocialProof() {
           <div className="space-y-4">
             <div>
               <p className="text-xs font-semibold text-green-700 dark:text-green-400 uppercase tracking-wider mb-3">
-                Corretoras Brasileiras — regime nacional (isenção R$ 35k + DARF mensal)
+                Corretoras brasileiras — em regra, regime de ganho de capital
               </p>
               <div className="flex flex-wrap justify-center gap-3">
                 {exchangesNacionais.map((ex) => (
@@ -65,7 +65,7 @@ export function SocialProof() {
             </div>
             <div className="pt-2">
               <p className="text-xs font-semibold text-purple-700 dark:text-purple-400 uppercase tracking-wider mb-3">
-                Corretoras Internacionais — regime exterior (15% flat · Lei 14.754/2023)
+                Plataformas no exterior — verificar enquadramento tributário
               </p>
               <div className="flex flex-wrap justify-center gap-3">
                 {exchangesEstrangeiras.map((ex) => (
@@ -84,6 +84,9 @@ export function SocialProof() {
           <h2 className="text-2xl font-bold mb-2">Seja um dos primeiros</h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
             Estamos no início e construindo junto com a comunidade. Experimente grátis e nos ajude a melhorar a ferramenta.
+          </p>
+          <p className="text-xs text-muted-foreground mt-3 max-w-xl mx-auto">
+            Resumo educacional: operações com cripto podem seguir regimes diferentes. A análise depende, entre outros fatores, de onde está a instituição, como ocorre a custódia e se há intermediário.
           </p>
         </div>
 

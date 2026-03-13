@@ -21,27 +21,27 @@ const faqs = [
       {
         pergunta: "Quando devo pagar imposto sobre criptomoedas?",
         resposta:
-          "Depende de onde você opera. Para exchanges com CNPJ no Brasil (regime nacional): você paga imposto quando vender com lucro E o total de vendas no mês ultrapassar R$ 35.000 — abaixo disso, está isento. Para exchanges sem CNPJ no Brasil como Binance global, Bybit, Coinbase e Kraken (regime exterior, Lei 14.754/2023): não existe faixa de isenção. Qualquer lucro é tributado à alíquota de 15% sobre o resultado líquido anual, pago na declaração anual — não via DARF mensal.",
+          "O pagamento de imposto depende do enquadramento tributário da operação. Em muitas situações sujeitas ao regime tradicional de ganho de capital, o imposto pode surgir quando há alienação com lucro e, conforme o caso, a regra de isenção mensal de R$ 35.000 pode ser relevante. Já em determinadas estruturas com instituição, intermediação ou custódia no exterior, a operação pode se enquadrar no regime de aplicações financeiras no exterior, cuja lógica de tributação é diferente e tende a ter apuração anual. O simples fato de usar uma plataforma estrangeira não resolve sozinho essa classificação.",
       },
       {
         pergunta: "Qual é a alíquota do imposto sobre criptomoedas?",
         resposta:
-          "Depende do regime. Para exchanges brasileiras (regime nacional): alíquotas progressivas de 15% para ganhos até R$ 5 milhões, 17,5% de R$ 5M a R$ 10M, 20% de R$ 10M a R$ 30M, e 22,5% acima de R$ 30M. Day trade de criptoativos usa essa mesma tabela progressiva — a alíquota de 20% fixo para day trade se aplica apenas à bolsa de valores, nunca a cripto. Para exchanges estrangeiras (regime exterior, Lei 14.754/2023): alíquota fixa de 15% sobre o lucro líquido anual, sem tabela progressiva e sem isenção.",
+          "A alíquota depende do regime tributário aplicável. Nas hipóteses sujeitas ao regime tradicional de ganho de capital, aplicam-se, em regra, as alíquotas progressivas previstas para ganho de capital (15% a 22,5%). Day trade de criptoativos usa essa mesma tabela progressiva — a alíquota de 20% fixo para day trade se aplica apenas à bolsa de valores, nunca a cripto. Nas hipóteses enquadradas como aplicações financeiras no exterior, a legislação aplicável pode prever apuração anual com alíquota de 15%. Antes de concluir pela alíquota, é importante identificar corretamente o regime da operação.",
       },
       {
         pergunta: "O que é o limite de isenção de R$ 35.000?",
         resposta:
-          "Se o total das suas vendas de criptomoedas em um mês for igual ou inferior a R$ 35.000, você está isento de pagar imposto sobre o ganho de capital, independentemente do lucro obtido. Atenção: essa isenção se aplica exclusivamente a operações em exchanges com CNPJ no Brasil (regime nacional), como Mercado Bitcoin, Foxbit e NovaDAX. Para exchanges estrangeiras como Coinbase, Kraken, Bybit e a Binance global, não existe faixa de isenção — qualquer lucro é tributado à alíquota de 15%.",
+          "A isenção mensal de R$ 35.000 está relacionada, em regra, ao regime tradicional de ganho de capital nas alienações de bens e direitos, considerando o total alienado no mês — não apenas o lucro. Essa regra não deve ser aplicada automaticamente a toda operação com cripto, especialmente quando houver possível enquadramento em regime diverso, como o de aplicações financeiras no exterior.",
       },
       {
         pergunta: "Troca de uma cripto por outra é tributável?",
         resposta:
-          "Em regra, a troca (swap) de uma criptomoeda por outra tende a ser tratada como uma venda seguida de uma compra para fins de IR. No regime nacional (exchanges com CNPJ no Brasil), se houver ganho e o total mensal de vendas ultrapassar R$ 35.000, há tributação. No regime da Lei 14.754/2023 (plataformas no exterior), a troca também pode gerar imposto, mas sem a faixa de isenção de R$ 35.000. Trocas realizadas diretamente em wallets próprias ou DEX sem intermediário têm enquadramento menos consolidado e devem ser analisadas conforme a situação específica.",
+          "Pode ser. Em geral, a troca de um criptoativo por outro envolve a alienação de um ativo e a aquisição de outro, o que pode gerar tributação. Mas a forma de apuração depende do regime tributário aplicável. Por isso, a regra dos R$ 35.000 não deve ser usada automaticamente para todo swap. Trocas realizadas diretamente em wallets próprias ou DEX sem intermediário têm enquadramento menos consolidado e devem ser analisadas conforme a situação específica.",
       },
       {
         pergunta: "Stablecoins como USDT são tributáveis?",
         resposta:
-          "Em regra, stablecoins são tratadas como criptoativos e a conversão de um criptoativo para stablecoin tende a ser considerada uma venda para fins de IR. O regime aplicável (nacional ou exterior, Lei 14.754/2023) depende da plataforma onde a operação ocorre. Operações em exchanges nacionais seguem as regras do regime nacional com isenção de R$ 35.000/mês; em exchanges estrangeiras, seguem a apuração anual sem isenção. O enquadramento de cada operação deve ser avaliado conforme o contexto.",
+          "Em regra, stablecoins são tratadas como criptoativos e a conversão de um criptoativo para stablecoin tende a ser considerada uma alienação para fins de IR. O regime aplicável depende da estrutura da operação — se há instituição ou custódia no exterior, o enquadramento pode seguir o regime de aplicações financeiras no exterior. O simples fato de a plataforma ser estrangeira não resolve automaticamente essa classificação.",
       },
     ],
   },
@@ -61,12 +61,12 @@ const faqs = [
       {
         pergunta: "Posso compensar prejuízos?",
         resposta:
-          "Sim. Prejuízos com criptoativos no regime nacional (exchanges com CNPJ no Brasil) podem ser compensados com ganhos futuros de criptoativos do mesmo regime. O prejuízo acumulado é carregado para os meses seguintes e reduz a base de cálculo do IR. No regime exterior (Lei 14.754/2023), prejuízos dentro do mesmo ano-calendário também compensam ganhos, mas não podem ser transferidos para anos seguintes.",
+          "A compensação de prejuízos depende do regime tributário aplicável à operação. Nas situações sujeitas ao regime de ganho de capital, prejuízos com criptoativos podem ser compensados com ganhos futuros do mesmo regime. Nas hipóteses enquadradas como aplicações financeiras no exterior, perdas e ganhos seguem a disciplina específica desse regime. Não é recomendável misturar automaticamente prejuízos de regimes diferentes. O prejuízo deve ser registrado na declaração anual.",
       },
       {
-        pergunta: "Como declarar operações em exchanges internacionais?",
+        pergunta: "Como declarar operações com instituições ou plataformas no exterior?",
         resposta:
-          "As regras são DIFERENTES das exchanges brasileiras. Exchanges estrangeiras (sem CNPJ no Brasil, como Binance global, Bybit, Coinbase, Kraken) seguem a Lei 14.754/2023: (1) Alíquota fixa de 15% sobre o lucro líquido anual — não existe a isenção de R$ 35.000; (2) Apuração é anual, paga na Declaração de Ajuste Anual (não gera DARF mensal); (3) Movimentações acima de R$ 30.000/mês exigem reporte via e-CAC (IN 1.888/2019). A conversão para reais usa a cotação PTAX do Banco Central.",
+          "As regras podem ser diferentes das operações sujeitas ao regime tradicional de ganho de capital. Em determinadas hipóteses, ativos virtuais custodiados ou negociados por instituições localizadas no exterior podem se enquadrar no regime de aplicações financeiras no exterior, com apuração anual na Declaração de Ajuste Anual. Mas isso não deve ser decidido automaticamente apenas porque a plataforma é estrangeira. É importante separar situações de autocustódia, wallets próprias, operações sem intermediário e operações em ambiente descentralizado, porque o enquadramento pode ser diferente. Obrigações acessórias de reporte podem alcançar tanto operações em exchange domiciliada no exterior quanto operações fora de exchange, quando presentes os requisitos legais. A conversão para reais usa a cotação PTAX do Banco Central.",
       },
     ],
   },
@@ -76,12 +76,12 @@ const faqs = [
       {
         pergunta: "Qual o prazo para pagar o imposto?",
         resposta:
-          "Depende do regime. Para exchanges brasileiras (regime nacional): o imposto via DARF deve ser pago até o último dia útil do mês seguinte à venda. Exemplo: vendeu em janeiro com lucro tributável, pague até o último dia útil de fevereiro. Para exchanges estrangeiras (regime exterior, Lei 14.754/2023): não há DARF mensal. O imposto é calculado sobre o lucro líquido anual e pago na Declaração de Ajuste Anual do IRPF, com vencimento no prazo normal da declaração (geralmente abril/maio do ano seguinte).",
+          "O prazo depende do regime tributário aplicável. Nas operações sujeitas ao regime de ganho de capital, o imposto via DARF deve ser pago até o último dia útil do mês seguinte à alienação. Nas hipóteses enquadradas como aplicações financeiras no exterior, a tributação ocorre de forma anual, na Declaração de Ajuste Anual do IRPF, com vencimento no prazo normal da declaração (geralmente abril/maio do ano seguinte).",
       },
       {
         pergunta: "O que é DARF e como emitir?",
         resposta:
-          "DARF é o Documento de Arrecadação de Receitas Federais, usado para pagar imposto sobre ganho de capital no regime nacional (exchanges com CNPJ no Brasil). Você emite pelo site da Receita Federal (Sicalc) ou pelo programa GCAP. O código é 4600 para ganho de capital de pessoa física. Atenção: operações em exchanges estrangeiras (Lei 14.754/2023) não geram DARF mensal — o imposto é pago na declaração anual.",
+          "DARF é o Documento de Arrecadação de Receitas Federais, usado para pagar imposto sobre ganho de capital. Você emite pelo site da Receita Federal (Sicalc) ou pelo programa GCAP. O código é 4600 para ganho de capital de pessoa física. Nas hipóteses enquadradas como aplicações financeiras no exterior, não há DARF mensal — o imposto é pago na Declaração de Ajuste Anual.",
       },
       {
         pergunta: "O que é o GCAP?",
@@ -91,7 +91,7 @@ const faqs = [
       {
         pergunta: "Preciso declarar mesmo se não paguei imposto?",
         resposta:
-          "Sim. Mesmo operações isentas devem ser informadas na declaração anual de IR, na ficha de Bens e Direitos. O código de declaração pode variar conforme o tipo de criptoativo — o código 89 (Demais bens e direitos) tende a ser utilizado para criptomoedas em geral, mas verifique as instruções do programa DIRPF do ano-calendário correspondente, pois as orientações da Receita Federal podem ser atualizadas. Em caso de dúvida, consulte um contador.",
+          "Sim. Mesmo operações isentas devem ser informadas na declaração anual de IR, na ficha de Bens e Direitos. O código de declaração pode variar conforme o tipo de criptoativo e as instruções do programa DIRPF do ano-calendário correspondente. Consulte sempre as orientações atualizadas da Receita Federal.",
       },
     ],
   },
@@ -101,17 +101,17 @@ const faqs = [
       {
         pergunta: "Por que exchanges estrangeiras têm regras diferentes?",
         resposta:
-          "A Lei 14.754/2023 criou um regime tributário específico para investimentos em entidades no exterior. O critério central é o enquadramento jurídico da operação — localização da instituição custodiante, existência de intermediário estrangeiro e natureza do ativo — não apenas a existência ou ausência de CNPJ no Brasil. Na prática, exchanges reconhecidamente estrangeiras como Binance global, Bybit, Coinbase, Kraken e OKX tendem a se enquadrar neste regime. As regras quando aplicável: (1) 15% sobre o lucro líquido anual — sem alíquota progressiva; (2) sem isenção de R$ 35.000/mês; (3) apuração anual paga na Declaração de Ajuste Anual, não via DARF mensal. Para situações atípicas (ex.: DEX, autocustódia, operações mistas), o enquadramento deve ser avaliado com cautela.",
+          "A Lei 14.754/2023 criou um regime tributário específico para investimentos em entidades no exterior. O critério central é o enquadramento jurídico da operação — localização da instituição custodiante, existência de intermediário estrangeiro e natureza do ativo — não apenas a existência ou ausência de CNPJ no Brasil. Quando aplicável, as regras são: (1) 15% sobre o lucro líquido anual — sem alíquota progressiva; (2) sem isenção de R$ 35.000/mês; (3) apuração anual paga na Declaração de Ajuste Anual, não via DARF mensal. Para situações de autocustódia, DEX ou operações sem intermediário, o enquadramento deve ser avaliado com cautela.",
       },
       {
         pergunta: "A Binance é brasileira ou estrangeira?",
         resposta:
-          "Depende da plataforma que você usou. A Binance Pay Brasil (operada pela Capitual/Latam) possui CNPJ no Brasil — segue o regime nacional com isenção de R$ 35k e DARF mensal. Já a plataforma global binance.com não tem CNPJ no Brasil e segue a Lei 14.754/2023 — 15% flat, sem isenção, apuração anual. Em caso de dúvida, verifique em qual entidade você criou sua conta.",
+          "Depende da plataforma utilizada. A Binance Pay Brasil (operada pela Capitual/Latam) possui CNPJ no Brasil e tende a se enquadrar no regime de ganho de capital. Já a plataforma global binance.com não possui CNPJ no Brasil e pode se enquadrar no regime de aplicações financeiras no exterior. Em caso de dúvida sobre o enquadramento, verifique em qual entidade você criou sua conta e consulte um especialista.",
       },
       {
         pergunta: "Preciso pagar DARF mensalmente por operações na Bybit, Coinbase ou Kraken?",
         resposta:
-          "Não. Exchanges estrangeiras (Lei 14.754/2023) não geram DARF mensal. O imposto é calculado sobre o lucro líquido anual e pago integralmente na Declaração de Ajuste Anual do IRPF, com prazo até abril/maio do ano seguinte.",
+          "Em regra, operações enquadradas no regime de aplicações financeiras no exterior não geram DARF mensal. A tributação tende a ser calculada sobre o resultado anual e paga na Declaração de Ajuste Anual do IRPF.",
       },
       {
         pergunta: "O que é a obrigação do e-CAC para exchanges estrangeiras?",
@@ -219,6 +219,13 @@ export default function FAQPage() {
             <Button asChild>
               <Link href="/calculadora">Acessar Calculadora</Link>
             </Button>
+          </div>
+
+          {/* Aviso de segurança jurídica */}
+          <div className="mt-8 text-center">
+            <p className="text-xs text-muted-foreground max-w-2xl mx-auto">
+              Este conteúdo tem finalidade educacional e resume regras tributárias que podem exigir interpretação conforme a estrutura da operação. Em casos com autocustódia, DEX, NFTs ou estruturas no exterior, a revisão por contador ou advogado tributarista pode ser recomendável.
+            </p>
           </div>
         </div>
       </main>

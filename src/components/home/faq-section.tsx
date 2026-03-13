@@ -11,12 +11,12 @@ const faqs = [
   {
     pergunta: "Quando devo pagar imposto sobre criptomoedas?",
     resposta:
-      "Você deve pagar imposto quando vender criptomoedas com lucro E o total de vendas no mês ultrapassar R$ 35.000. Abaixo desse limite, mesmo com lucro, você está isento.",
+      "Em regra, no regime de ganho de capital, você deve pagar imposto quando vender criptomoedas com lucro e o total de vendas no mês ultrapassar R$ 35.000 em corretoras brasileiras. Porém, o enquadramento pode variar conforme a exchange e o tipo de operação — consulte um contador para confirmar o regime aplicável ao seu caso.",
   },
   {
     pergunta: "Troca de uma cripto por outra precisa pagar IR?",
     resposta:
-      "Sim. O swap entre criptomoedas é considerado uma venda seguida de compra. Se houver lucro e o total do mês passar de R$ 35.000, há tributação.",
+      "A troca (swap) de uma criptomoeda por outra pode caracterizar alienação para fins de IR, dependendo do regime aplicável. Se for tratada como venda, o lucro apurado pode ser tributado conforme as regras vigentes. Recomendamos consultar um profissional para avaliar seu caso específico.",
   },
   {
     pergunta: "Como funciona o cálculo de preço médio?",
@@ -26,12 +26,12 @@ const faqs = [
   {
     pergunta: "Stablecoins como USDT são tributáveis?",
     resposta:
-      "Sim. Stablecoins seguem as mesmas regras dos criptoativos. Converter Bitcoin para USDT, por exemplo, é considerado uma venda de Bitcoin e pode gerar tributação.",
+      "Em geral, stablecoins seguem as mesmas regras aplicáveis a outros criptoativos. Converter Bitcoin para USDT, por exemplo, pode ser tratado como alienação de Bitcoin e, dependendo do regime, gerar tributação. O enquadramento exato depende das circunstâncias da operação.",
   },
   {
     pergunta: "Qual o prazo para pagar o imposto (DARF)?",
     resposta:
-      "O DARF deve ser pago até o último dia útil do mês seguinte à venda. Por exemplo: vendeu em março com lucro tributável, pague até o último dia útil de abril.",
+      "No regime de ganho de capital, o DARF deve ser pago até o último dia útil do mês seguinte à venda. Por exemplo: vendeu em março com lucro tributável, pague até o último dia útil de abril. Para outros regimes, o prazo pode ser diferente — verifique com seu contador.",
   },
   {
     pergunta: "Os meus dados ficam seguros?",

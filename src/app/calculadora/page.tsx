@@ -381,7 +381,7 @@ export default function CalculadoraPage() {
               </span>
               <span className="block pl-2 border-l-2 border-purple-400 text-xs">
                 <strong>Binance Global (binance.com)</strong> — sem CNPJ no Brasil.
-                15% flat sobre lucro anual, sem isenção (Lei 14.754/2023).
+                Pode se enquadrar no regime de aplicações financeiras no exterior (15% sobre resultado anual, conforme Lei 14.754/2023).
               </span>
             </DialogDescription>
           </DialogHeader>
@@ -582,7 +582,7 @@ export default function CalculadoraPage() {
             <AlertTriangle className="h-5 w-5 text-orange-500 flex-shrink-0 mt-0.5" />
             <div>
               <p className="font-medium text-sm text-orange-800 dark:text-orange-300">
-                Obrigação acessória — exchanges estrangeiras
+                Obrigação acessória — operações com criptoativos
               </p>
               <p className="text-xs text-orange-700 dark:text-orange-400 mt-0.5">
                 Você movimentou{" "}
@@ -590,7 +590,7 @@ export default function CalculadoraPage() {
                 <strong>
                   {new Date(alertaExteriorMes[0] + "-15").toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}
                 </strong>.
-                {" "}Por superar R$ 30.000, você deve reportar via{" "}
+                {" "}Por superar R$ 30.000, pode haver obrigação de reporte via{" "}
                 <a
                   href="https://cav.receita.fazenda.gov.br"
                   target="_blank"
@@ -599,7 +599,7 @@ export default function CalculadoraPage() {
                 >
                   e-CAC
                 </a>{" "}
-                até o último dia do mês seguinte (IN 1.888/2019).
+                até o último dia do mês seguinte (IN 1.888/2019). Essa obrigação pode alcançar também operações fora de exchange, quando aplicável.
               </p>
             </div>
           </div>
@@ -639,7 +639,7 @@ export default function CalculadoraPage() {
               </p>
             </div>
             <div className="text-right text-xs text-muted-foreground hidden sm:block">
-              <p>15% flat · apuração anual</p>
+              <p>15% (Lei 14.754/2023) · apuração anual</p>
               <p>Lei 14.754/2023</p>
             </div>
           </div>
@@ -654,8 +654,8 @@ export default function CalculadoraPage() {
                 Nova obrigação — DeCripto a partir de 01/07/2026
               </p>
               <p className="text-xs text-blue-700 dark:text-blue-400 mt-0.5">
-                A partir de julho de 2026, o reporte de operações em exchanges estrangeiras passará a ser feito
-                pela <strong>DeCripto</strong> (Declaração de Criptoativos no Exterior), conforme{" "}
+                A partir de julho de 2026, exchanges estrangeiras e outras instituições podem ser obrigadas a reportar
+                operações pela <strong>DeCripto</strong> (Declaração de Criptoativos no Exterior), conforme{" "}
                 <strong>IN RFB 2.291/2025</strong>. Até lá, continuam válidas as regras atuais de reporte via e-CAC (IN 1.888/2019).
               </p>
             </div>
@@ -1073,7 +1073,7 @@ export default function CalculadoraPage() {
                       <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" />
                       <div>
                         <p className="font-medium text-xs">Day Trade detectado</p>
-                        <p className="text-[11px] mt-0.5">Sem isenção R$35k · Tabela progressiva (15–22,5%)</p>
+                        <p className="text-[11px] mt-0.5">Sem isenção R$35k no regime de ganho de capital · Tabela progressiva (15–22,5%)</p>
                       </div>
                     </div>
                   )}
@@ -1149,7 +1149,7 @@ export default function CalculadoraPage() {
                         <div>
                           <p className="font-medium text-sm">Imposto Estimado</p>
                           <p className="text-xl font-bold mt-1">{formatCurrency(r.impostoEstimado)}</p>
-                          <p className="text-xs mt-1">15% · pago na declaração anual (não DARF)</p>
+                          <p className="text-xs mt-1">15% (Lei 14.754/2023) · pago na declaração anual (não DARF)</p>
                         </div>
                       </div>
                     ) : (
@@ -1163,7 +1163,7 @@ export default function CalculadoraPage() {
                     )}
                   </div>
                   <p className="text-[11px] text-muted-foreground text-center pt-1">
-                    Lei 14.754/2023 · sem isenção de R$35k · apuração anual
+                    Lei 14.754/2023 · isenção de R$ 35.000 não se aplica neste regime · apuração anual
                   </p>
                 </CardContent>
               </Card>
@@ -1184,7 +1184,7 @@ export default function CalculadoraPage() {
                 <div className="p-3 bg-muted/50 rounded-lg">
                   <p className="font-medium text-foreground text-sm flex items-center gap-1.5">
                     <Building2 className="h-4 w-4 text-primary" />
-                    Corretoras Brasileiras
+                    Corretoras Brasileiras (regime de ganho de capital)
                   </p>
                   <ul className="mt-1.5 space-y-1 text-xs">
                     <li>Isenção: vendas até R$ 35.000/mês</li>
@@ -1193,7 +1193,7 @@ export default function CalculadoraPage() {
                   </ul>
                 </div>
                 <div className="p-3 bg-orange-50 dark:bg-orange-950/30 rounded-lg border border-orange-200 dark:border-orange-800">
-                  <p className="font-medium text-orange-800 dark:text-orange-300 text-sm">Day Trade (cripto)</p>
+                  <p className="font-medium text-orange-800 dark:text-orange-300 text-sm">Day Trade (cripto — regime de ganho de capital)</p>
                   <p className="text-xs mt-0.5 text-orange-700 dark:text-orange-400">
                     Sem isenção de R$35k · Tabela progressiva 15–22,5%
                     <br />
@@ -1212,13 +1212,13 @@ export default function CalculadoraPage() {
                 <div className="p-3 bg-purple-50 dark:bg-purple-950/30 rounded-lg border border-purple-200 dark:border-purple-800">
                   <p className="font-medium text-purple-800 dark:text-purple-300 text-sm flex items-center gap-1.5">
                     <Globe className="h-4 w-4" />
-                    Exchanges Estrangeiras
+                    Operações com instituição/custódia no exterior
                   </p>
                   <ul className="mt-1.5 space-y-1 text-xs text-purple-700 dark:text-purple-400">
-                    <li>Sem isenção de R$35k</li>
-                    <li>15% fixo sobre lucro líquido anual</li>
+                    <li>Isenção de R$ 35.000 não se aplica neste regime</li>
+                    <li>15% sobre lucro líquido anual (conforme Lei 14.754/2023, quando aplicável)</li>
                     <li>Apuração anual (declaração de IR)</li>
-                    <li>Lei 14.754/2023 + IN RFB 2.180/2024</li>
+                    <li>Em regra, pode se enquadrar na Lei 14.754/2023 + IN RFB 2.180/2024</li>
                   </ul>
                 </div>
                 <Link
